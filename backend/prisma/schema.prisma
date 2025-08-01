@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------
+// MODELS - แบบจำลองข้อมูล
+// ---------------------
+
+// --- ระบบผู้ดูแล ---
+model Admin {
+  id        String   @id @default(cuid()) // ใช้ String และ cuid() เพื่อ ID ที่ไม่สามารถคาดเดาได้ ปลอดภัยกว่าตัวเลขเรียง
+  username  String   @unique // ชื่อผู้ใช้ต้องไม่ซ้ำกัน
+  password  String   // จะเก็บรหัสผ่านที่ "เข้ารหัสแล้ว" เท่านั้น ไม่เก็บรหัสผ่านตรงๆ
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- เกม ---
+model Game {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique // ชื่อเกมต้องไม่ซ้ำกัน เช่น Valorant, League of Legends
+  imageUrl    String?      // URL รูปภาพของเกม (เครื่องหมาย ? หมายถึง optional ไม่ใส่ก็ได้)
+
+  // ความสัมพันธ์: 1 Game มีได้หลาย Team และหลาย MetaGuide
+  teams       Team[]
+  metaGuides  MetaGuide[]
+}
+
+// --- ทีม ---
+model Team {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // ชื่อทีมต้องไม่ซ้ำกัน
+  logoUrl     String?  // URL โลโก้ทีม
+  description String?  @db.Text // @db.Text เหมาะสำหรับข้อความยาวๆ
+
+  // ความสัมพันธ์: 1 Team สังกัด 1 Game
+  gameId      Int
+  game        Game     @relation(fields: [gameId], references: [id])
+
+  // ความสัมพันธ์: 1 Team มีได้หลาย Player
+  players     Player[]
+}
+
+// --- นักกีฬา ---
+model Player {
+  id        Int     @id @default(autoincrement())
+  nickname  String  // ชื่อในเกม
+  realName  String? // ชื่อจริง (อาจไม่บังคับใส่)
+  imageUrl  String? // URL รูปโปรไฟล์
+  role      String? // ตำแหน่งในทีม เช่น Duelist, Support
+
+  // ความสัมพันธ์: 1 Player สังกัด 1 Team
+  teamId    Int
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  // onDelete: Cascade คือรายละเอียดสำคัญ: ถ้าทีมถูกลบ ข้อมูลผู้เล่นในทีมนั้นจะถูกลบตามไปด้วยอัตโนมัติ
+}
+
+// --- ข่าวสาร ---
+model NewsArticle {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  imageUrl    String?
+  author      String   @default("TAE-ESPORT") // กำหนดค่าเริ่มต้นให้ผู้เขียน
+  publishedAt DateTime @default(now()) // วันที่เผยแพร่
+  updatedAt   DateTime @updatedAt      // วันที่แก้ไขล่าสุด
+}
+
+// --- เมต้าแนะนำ ---
+model MetaGuide {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  author      String   @default("TAE Analysis")
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ความสัมพันธ์: 1 MetaGuide จะต้องเกี่ยวกับ 1 Game
+  gameId      Int
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
