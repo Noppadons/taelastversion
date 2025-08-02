@@ -1,16 +1,13 @@
-// frontend/src/components/Navbar.jsx
-
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate(); // เรายังคงใช้ navigate สำหรับส่วนอื่นได้ แต่ไม่ใช่ตอน logout
 
   const handleLogout = () => {
-    logout(); // สั่งให้ออกจากระบบ (ลบ Token)
-    window.location.assign('/'); // บังคับให้โหลดหน้า Home ใหม่ทั้งหมด
+    window.location.assign('/');
+    logout();
   };
   
   const navLinks = [
@@ -23,15 +20,15 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-primary text-base-content sticky top-0 z-40">
+    <nav className="bg-surface text-text-secondary sticky top-0 z-40 shadow-md">
       <div className="container mx-auto flex justify-between items-center p-4">
-        <Link to="/" className="text-2xl font-bold text-secondary hover:text-white transition-colors">
+        <Link to="/" className="text-2xl font-bold text-accent hover:opacity-80 transition-opacity">
           TAE-ESPORT
         </Link>
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.title}>
-              <Link to={link.path} className="text-lg hover:text-secondary transition-colors">
+              <Link to={link.path} className="text-lg hover:text-accent transition-colors">
                 {link.title}
               </Link>
             </li>
@@ -40,11 +37,11 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           {isAuthenticated ? (
             <>
-              <Link to="/admin" className="btn btn-sm btn-outline btn-secondary">Admin Panel</Link>
-              <button onClick={handleLogout} className="btn btn-sm btn-ghost">Logout</button>
+              <Link to="/admin" className="btn-outline !py-1 !px-3 text-sm">Admin Panel</Link>
+              <button onClick={handleLogout} className="btn-ghost !py-1 !px-3 text-sm">Logout</button>
             </>
           ) : (
-            <Link to="/login" className="btn btn-sm btn-outline btn-secondary">
+            <Link to="/login" className="btn-outline !py-1 !px-3 text-sm">
               Admin Login
             </Link>
           )}

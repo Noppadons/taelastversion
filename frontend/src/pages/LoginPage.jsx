@@ -1,5 +1,3 @@
-// frontend/src/pages/LoginPage.jsx (โค้ดนี้ถูกต้องอยู่แล้ว แต่เพื่อความชัวร์ครับ)
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,10 +16,9 @@ const LoginPage = () => {
     try {
       const response = await apiClient.post('/auth/login', { username, password });
       const { token } = response.data;
-      
       if (token) {
         login(token);
-        navigate('/admin'); // <-- คำสั่งให้เด้งไปที่หน้า AdminDashbord
+        navigate('/admin');
       }
     } catch (err) {
       setError('Invalid username or password.');
@@ -29,22 +26,21 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="bg-base-100 min-h-screen flex items-center justify-center">
-      <div className="card w-full max-w-sm shadow-2xl bg-gray-800">
+    <div className="bg-background min-h-screen flex items-center justify-center">
+      <div className="card w-full max-w-sm shadow-2xl bg-surface">
         <form className="card-body" onSubmit={handleSubmit}>
-          <h1 className="card-title text-2xl text-white justify-center mb-4">Admin Login</h1>
-          {/* ... โค้ดส่วนของ form inputs ... */}
+          <h1 className="card-title text-2xl text-text-main justify-center mb-4">Admin Login</h1>
           <div className="form-control">
-            <label className="label"><span className="label-text text-base-content">Username</span></label>
-            <input type="text" placeholder="username" className="input input-bordered bg-gray-700 text-white" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            <label className="label"><span className="label-text text-text-secondary">Username</span></label>
+            <input type="text" placeholder="username" className="input-field" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
           <div className="form-control">
-            <label className="label"><span className="label-text text-base-content">Password</span></label>
-            <input type="password" placeholder="password" className="input input-bordered bg-gray-700 text-white" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <label className="label"><span className="label-text text-text-secondary">Password</span></label>
+            <input type="password" placeholder="password" className="input-field" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <div className="form-control mt-6">
-            <button type="submit" className="btn bg-secondary text-white hover:bg-red-700">Login</button>
+            <button type="submit" className="btn-primary w-full">Login</button>
           </div>
         </form>
       </div>

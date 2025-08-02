@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+// frontend/src/pages/NewsPage.jsx (ฉบับแปลงโฉม)
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import apiClient from '../api/axios';
-import { Link } from 'react-router-dom'; // เพิ่มการ import Link เข้ามา
+import NewsCard from '../components/cards/NewsCard'; // 1. Import NewsCard
 
 const NewsPage = () => {
   const [articles, setArticles] = useState([]);
@@ -9,65 +12,88 @@ const NewsPage = () => {
 
   useEffect(() => {
     const fetchNews = async () => {
+      setLoading(true);
       try {
         const response = await apiClient.get('/news');
         setArticles(response.data);
       } catch (err) {
         setError(err.message);
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500);
       }
     };
 
     fetchNews();
   }, []);
 
-  if (loading) {
-    return <div className="text-center p-8 text-white">Loading news...</div>;
-  }
+  // 2. แยกข่าวเด่น (ข่าวแรก) ออกมาจากข่าวที่เหลือ
+  const featuredArticle = useMemo(() => articles[0], [articles]);
+  const otherArticles = useMemo(() => articles.slice(1), [articles]);
 
   if (error) {
     return <div className="text-center p-8 text-red-500">Error: {error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-4xl font-bold mb-8 text-white text-center">Latest News</h1>
-      
-      {articles.length === 0 ? (
-        <p className="text-center text-base-content">No news articles found.</p>
-      ) : (
-        <div className="space-y-8">
-          {articles.map((article) => (
-            <div key={article.id} className="bg-gray-800 rounded-lg shadow-lg flex flex-col md:flex-row overflow-hidden hover:bg-gray-700 transition-colors duration-300">
-              <img 
-                src={article.imageUrl || 'https://via.placeholder.com/400x250?text=News'} 
-                alt={article.title} 
-                className="w-full md:w-1/3 h-64 md:h-auto object-cover"
-              />
-              <div className="p-6 flex flex-col justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">{article.title}</h2>
-                  <p className="text-base-content mb-4">
-                    {article.content.substring(0, 150)}...
-                  </p>
-                </div>
-                <div className="flex justify-between items-center mt-4">
-                    <span className="text-sm text-gray-400">
-                        Published on {new Date(article.publishedAt).toLocaleDateString('en-US', {
-                            year: 'numeric', month: 'long', day: 'numeric'
-                        })}
-                    </span>
-                    {/* แก้ไขจาก button เป็น Link ที่นี่ */}
-                    <Link to={`/news/${article.id}`} className="text-secondary hover:text-white font-bold">
-                        Read More &rarr;
-                    </Link>
-                </div>
-              </div>
-            </div>
-          ))}
+    <div className="bg-background min-h-screen">
+      {/* ===== Page Header ===== */}
+      <section className="bg-surface py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-text-main">ข่าวสารและอัพเดท</h1>
+          <p className="text-lg text-text-secondary mt-2">ติดตามข่าวสารใหม่ ในวงการอีสปอร์ต</p>
         </div>
-      )}
+      </section>
+
+      <div className="container mx-auto p-8">
+        {loading ? (
+          <p className="text-center text-text-secondary">Loading news...</p>
+        ) : (
+          articles.length > 0 ? (
+            <>
+              {/* ===== Featured Article Section ===== */}
+              <section className="mb-16">
+                <Link to={`/news/${featuredArticle.id}`} className="group block">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-surface rounded-lg shadow-lg overflow-hidden">
+                    <div className="h-64 md:h-full bg-background">
+                      <img 
+                        src={featuredArticle.imageUrl || 'https://via.placeholder.com/800x600?text=Featured'} 
+                        alt={featuredArticle.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="p-8">
+                      <p className="text-accent font-semibold mb-2">บทความเด่น</p>
+                      <h2 className="text-3xl font-bold text-text-main mb-4 group-hover:text-accent transition-colors">
+                        {featuredArticle.title}
+                      </h2>
+                      <p className="text-text-secondary mb-6">
+                        {featuredArticle.content.substring(0, 150)}...
+                      </p>
+                      <span className="font-bold text-text-main group-hover:underline">อ่านต่อ &rarr;</span>
+                    </div>
+                  </div>
+                </Link>
+              </section>
+
+              {/* ===== Other Articles Grid ===== */}
+              {otherArticles.length > 0 && (
+                <section>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {otherArticles.map(article => (
+                      <NewsCard key={article.id} article={article} /> // 3. เรียกใช้ NewsCard
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-16">
+              <h3 className="text-2xl text-text-main">No News Available</h3>
+              <p className="text-text-secondary mt-2">Please check back later for updates.</p>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 };

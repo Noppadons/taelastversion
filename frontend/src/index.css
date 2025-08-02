@@ -1,5 +1,41 @@
-/* frontend/src/index.css */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== Custom Component Styles ===== */
+@layer components {
+  /* --- Primary Button --- */
+  .btn-primary {
+    @apply bg-accent text-white font-bold py-2 px-5 rounded-lg transition-all duration-300 ease-in-out flex items-center justify-center;
+    @apply hover:opacity-90 hover:shadow-lg hover:shadow-accent/30;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-accent;
+    @apply disabled:bg-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none;
+  }
+
+  /* --- Outline Button --- */
+  .btn-outline {
+    @apply bg-transparent border-2 border-accent text-accent font-semibold py-2 px-5 rounded-lg transition-all duration-300 ease-in-out flex items-center justify-center;
+    @apply hover:bg-accent hover:text-white hover:shadow-lg hover:shadow-accent/30;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-accent;
+  }
+  
+  /* --- Ghost Button --- */
+  .btn-ghost {
+    @apply bg-transparent text-text-secondary font-semibold py-2 px-5 rounded-lg transition-colors duration-300 flex items-center justify-center;
+    @apply hover:bg-surface hover:text-text-main;
+  }
+
+  /* --- Form Input Styling (ฉบับแก้ไข) --- */
+  .input-field {
+    @apply w-full rounded-lg px-4 py-2 bg-background border-2 border-surface text-text-main transition-colors duration-300;
+    @apply focus:border-accent focus:ring-0;
+  }
+  .textarea-field {
+    @apply w-full rounded-lg px-4 py-2 bg-background border-2 border-surface text-text-main transition-colors duration-300;
+    @apply focus:border-accent focus:ring-0;
+  }
+  .select-field {
+    @apply w-full rounded-lg pl-4 pr-10 py-2 bg-background border-2 border-surface text-text-main transition-colors duration-300 appearance-none;
+    @apply focus:border-accent focus:ring-0;
+  }
+}

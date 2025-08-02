@@ -1,27 +1,22 @@
-// frontend/src/pages/admin/TeamFormPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axios';
+import { FaSave } from 'react-icons/fa';
 
 const TeamFormPage = () => {
-  // ดึง id จาก URL, ถ้าเป็นหน้า "new" จะไม่มี id
   const { id } = useParams(); 
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
-
-  // State สำหรับเก็บข้อมูลในฟอร์ม
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [teamData, setTeamData] = useState({
     name: '',
     description: '',
     logoUrl: '',
     gameId: '',
   });
-  const [games, setGames] = useState([]); // State สำหรับเก็บรายชื่อเกมทั้งหมด (สำหรับ dropdown)
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  // 1. ดึงข้อมูลเกมทั้งหมดมาเพื่อสร้าง dropdown
   useEffect(() => {
     const fetchGames = async () => {
       try {
@@ -32,10 +27,6 @@ const TeamFormPage = () => {
       }
     };
     fetchGames();
-  }, []);
-
-  // 2. ถ้าเป็นโหมดแก้ไข (มี id), ให้ดึงข้อมูลของทีมนั้นๆ มาใส่ในฟอร์ม
-  useEffect(() => {
     if (isEditMode) {
       const fetchTeamData = async () => {
         setLoading(true);
@@ -59,85 +50,81 @@ const TeamFormPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setTeamData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setTeamData(prevState => ({ ...prevState, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    // ตรวจสอบว่าเลือกเกมแล้วหรือยัง
     if (!teamData.gameId) {
       setError('Please select a game.');
       setLoading(false);
       return;
     }
-
-    const payload = {
-      ...teamData,
-      gameId: parseInt(teamData.gameId)
-    };
-
+    const payload = { ...teamData, gameId: parseInt(teamData.gameId) };
     try {
       if (isEditMode) {
-        // โหมดแก้ไข: ใช้ method PUT
         await apiClient.put(`/teams/${id}`, payload);
       } else {
-        // โหมดสร้างใหม่: ใช้ method POST
         await apiClient.post('/teams', payload);
       }
       alert(`Team ${isEditMode ? 'updated' : 'created'} successfully!`);
-      navigate('/admin/manage-teams'); // กลับไปหน้าตาราง
+      navigate('/admin/manage-teams');
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   if (loading && isEditMode) return <p>Loading form...</p>;
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">{isEditMode ? 'Edit Team' : 'Create New Team'}</h1>
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-8 rounded-lg max-w-2xl">
-        {/* Team Name */}
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-base-content mb-2">Team Name</label>
-          <input type="text" id="name" name="name" value={teamData.name} onChange={handleChange} className="w-full input bg-gray-700" required />
+      <h1 className="text-3xl font-bold mb-6 text-text-main">{isEditMode ? `Edit Team: ${teamData.name}` : 'Create New Team'}</h1>
+      <form onSubmit={handleSubmit} className="bg-surface p-8 rounded-lg shadow-lg">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">Team Name</label>
+              <input type="text" id="name" name="name" value={teamData.name} onChange={handleChange} className="input-field" required />
+            </div>
+            <div>
+              <label htmlFor="gameId" className="block text-sm font-medium text-text-secondary mb-1">Game</label>
+              <select id="gameId" name="gameId" value={teamData.gameId} onChange={handleChange} className="select-field" required>
+                <option value="" disabled>Select a game</option>
+                {games.map(game => (
+                  <option key={game.id} value={game.id}>{game.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+              <textarea id="description" name="description" value={teamData.description} onChange={handleChange} className="textarea-field" rows="6"></textarea>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="logoUrl" className="block text-sm font-medium text-text-secondary mb-1">Logo URL</label>
+            <input type="text" id="logoUrl" name="logoUrl" value={teamData.logoUrl} onChange={handleChange} className="input-field mb-2" />
+            <div className="bg-background rounded-lg p-4 h-48 flex items-center justify-center">
+              {teamData.logoUrl ? (
+                <img src={teamData.logoUrl} alt="Logo Preview" className="max-h-full max-w-full object-contain"/>
+              ) : (
+                <p className="text-text-secondary text-sm">Image Preview</p>
+              )}
+            </div>
+          </div>
         </div>
-        {/* Description */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-base-content mb-2">Description</label>
-          <textarea id="description" name="description" value={teamData.description} onChange={handleChange} className="w-full textarea bg-gray-700" rows="4"></textarea>
-        </div>
-        {/* Logo URL */}
-        <div className="mb-4">
-          <label htmlFor="logoUrl" className="block text-base-content mb-2">Logo URL</label>
-          <input type="text" id="logoUrl" name="logoUrl" value={teamData.logoUrl} onChange={handleChange} className="w-full input bg-gray-700" />
-        </div>
-        {/* Game Selection */}
-        <div className="mb-6">
-          <label htmlFor="gameId" className="block text-base-content mb-2">Game</label>
-          <select id="gameId" name="gameId" value={teamData.gameId} onChange={handleChange} className="w-full select bg-gray-700" required>
-            <option value="" disabled>Select a game</option>
-            {games.map(game => (
-              <option key={game.id} value={game.id}>{game.name}</option>
-            ))}
-          </select>
-        </div>
+        
+        {error && <p className="text-red-500 mt-6">{error}</p>}
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-        <div className="flex items-center gap-4">
-          <button type="submit" className="btn bg-secondary text-white" disabled={loading}>
+        <div className="mt-8 pt-6 border-t border-gray-700 flex items-center gap-4">
+          <button type="submit" className="btn-primary" disabled={loading}>
+            <FaSave className="mr-2" />
             {loading ? 'Saving...' : (isEditMode ? 'Update Team' : 'Create Team')}
           </button>
-          <Link to="/admin/manage-teams" className="btn btn-ghost">Cancel</Link>
+          <Link to="/admin/manage-teams" className="btn-ghost">Cancel</Link>
         </div>
       </form>
     </div>

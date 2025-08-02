@@ -1,4 +1,4 @@
-// backend/routes/players.js
+// backend/routes/players.js (ฉบับแก้ไข)
 
 const express = require('express');
 const router = express.Router();
@@ -11,7 +11,11 @@ router.get('/', async (req, res) => {
   try {
     const players = await prisma.player.findMany({
       include: {
-        team: true,
+        team: { //  <-- แก้ไขส่วนนี้
+          include: {
+            game: true //  <-- ให้ดึงข้อมูล game ที่อยู่ใน team มาด้วย
+          }
+        }
       },
     });
     res.json(players);
@@ -25,7 +29,13 @@ router.get('/:id', async (req, res) => {
     try {
         const player = await prisma.player.findUnique({
             where: { id: parseInt(id) },
-            include: { team: true },
+            include: { 
+              team: {
+                include: {
+                  game: true
+                }
+              }
+            },
         });
         if (!player) {
             return res.status(404).json({ error: 'Player not found' });
@@ -36,7 +46,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// PROTECTED
+// PROTECTED (ส่วนที่เหลือเหมือนเดิม)
 router.post('/', authMiddleware, async (req, res) => {
   const { nickname, realName, imageUrl, role, teamId } = req.body;
   if (!nickname || !teamId) {
