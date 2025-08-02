@@ -22,7 +22,7 @@ const ContactPage = () => {
       icon: <FaDiscord className="text-accent" size={24} />,
       title: 'Join our Discord',
       detail: 'discord.gg/tae-esport',
-      href: 'https://discord.gg/TYJa5Bmf'
+      href: 'https://discord.gg/DTME7bp7'
     },
     {
       icon: <FaMapMarkerAlt className="text-accent" size={24} />,
