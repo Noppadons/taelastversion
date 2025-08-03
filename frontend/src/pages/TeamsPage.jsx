@@ -40,8 +40,8 @@ const TeamsPage = () => {
     <div className="bg-background min-h-screen pb-16">
       <section className="bg-surface py-12">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-text-main">OUR ROSTERS</h1>
-          <p className="text-lg text-text-secondary mt-2">The heart of our organization. Competing at the highest level.</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-text-main">รายชื่อทีมของเรา</h1>
+          <p className="text-lg text-text-secondary mt-2">หัวใจขององค์กรเรา คือการแข่งขันในระดับสูงสุด ไม่ย่อท้อต่อความยากลำบาก</p>
         </div>
       </section>
       <div className="container mx-auto p-8">
