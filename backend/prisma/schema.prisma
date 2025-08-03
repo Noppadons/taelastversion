@@ -1,28 +1,59 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// Enum สำหรับกำหนด Role
 enum Role {
   ADMIN
   USER
 }
-
-// Model ใหม่สำหรับ User
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String    @id @default(cuid())
+  username          String    @unique
+  email             String    @unique
+  password          String
+  profileImageUrl   String?
+  role              Role      @default(USER)
+  isVerified        Boolean   @default(false)
+  verificationToken String?   @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  comments          Comment[]
 }
-
+model Comment {
+  id              Int          @id @default(autoincrement())
+  text            String
+  createdAt       DateTime     @default(now())
+  author          User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId        String
+  newsArticle     NewsArticle? @relation(fields: [newsArticleId], references: [id], onDelete: Cascade)
+  newsArticleId   Int?
+  metaGuide       MetaGuide?   @relation(fields: [metaGuideId], references: [id], onDelete: Cascade)
+  metaGuideId     Int?
+}
+model NewsArticle {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String    @db.Text
+  imageUrl    String?
+  author      String    @default("TAE-ESPORT")
+  publishedAt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+}
+model MetaGuide {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String    @db.Text
+  author      String    @default("TAE Analysis")
+  publishedAt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  gameId      Int
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+}
 model Game {
   id          Int          @id @default(autoincrement())
   name        String       @unique
@@ -31,7 +62,6 @@ model Game {
   metaGuides  MetaGuide[]
   playerStats PlayerStat[]
 }
-
 model Team {
   id          Int      @id @default(autoincrement())
   name        String   @unique
@@ -41,7 +71,6 @@ model Team {
   game        Game     @relation(fields: [gameId], references: [id])
   players     Player[]
 }
-
 model Player {
   id        Int          @id @default(autoincrement())
   nickname  String
@@ -52,28 +81,6 @@ model Player {
   team      Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
   stats     PlayerStat[]
 }
-
-model NewsArticle {
-  id          Int      @id @default(autoincrement())
-  title       String
-  content     String   @db.Text
-  imageUrl    String?
-  author      String   @default("TAE-ESPORT")
-  publishedAt DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model MetaGuide {
-  id          Int      @id @default(autoincrement())
-  title       String
-  content     String   @db.Text
-  author      String   @default("TAE Analysis")
-  publishedAt DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  gameId      Int
-  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-}
-
 model PlayerStat {
   id        Int    @id @default(autoincrement())
   stats     Json
@@ -81,6 +88,5 @@ model PlayerStat {
   playerId  Int
   game      Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
   gameId    Int
-
   @@unique([playerId, gameId])
 }

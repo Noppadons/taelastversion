@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom'; // <-- เพิ่ม useNavigate
 import { useAuth } from '../context/AuthContext';
-import { FaUserCircle } from 'react-icons/fa';
-import { HiMenu, HiX } from 'react-icons/hi'; // Import icons for hamburger menu
+import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate(); // <-- เรียกใช้ useNavigate
 
   const handleLogout = () => {
     logout();
-    window.location.assign('/');
+    navigate('/'); // <-- สั่งให้กลับไปที่หน้า Home
   };
   
   const navLinks = [
@@ -23,6 +23,16 @@ const Navbar = () => {
     { title: 'Contact', path: '/contact' },
   ];
 
+  const UserAvatar = () => (
+    <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center overflow-hidden">
+        <img 
+            src={user?.profileImageUrl || `https://ui-avatars.com/api/?name=${user?.username.substring(0,1)}&background=111827&color=22d3ee`} 
+            alt="User Avatar"
+            className="w-full h-full object-cover"
+        />
+    </div>
+  );
+
   return (
     <nav className="bg-surface text-text-secondary sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex justify-between items-center p-4">
@@ -30,7 +40,6 @@ const Navbar = () => {
           TAE-ESPORT
         </Link>
         
-        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.title}>
@@ -41,14 +50,13 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           {isAuthenticated ? (
             <>
-              <div className="flex items-center gap-2 text-text-main">
-                <FaUserCircle />
+              <Link to="/profile" className="flex items-center gap-3 text-text-main hover:text-accent transition-colors">
+                <UserAvatar />
                 <span className="font-semibold">{user?.username}</span>
-              </div>
+              </Link>
               {user?.role === 'ADMIN' && (
                   <Link to="/admin" className="btn-outline !py-1 !px-3 text-sm">Admin Panel</Link>
               )}
@@ -62,7 +70,6 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <div className="md:hidden z-50">
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             {isMobileMenuOpen ? <HiX size={28} className="text-text-main" /> : <HiMenu size={28} className="text-text-main" />}
@@ -70,31 +77,30 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-0 left-0 w-full h-screen bg-background pt-24"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden absolute top-full left-0 w-full bg-surface shadow-lg"
           >
-            <ul className="flex flex-col items-center gap-y-6">
+            <ul className="flex flex-col items-center gap-y-4 py-4">
               {navLinks.map((link) => (
                 <li key={link.title}>
-                  <NavLink to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `text-2xl transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
+                  <NavLink to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `text-xl transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
                     {link.title}
                   </NavLink>
                 </li>
               ))}
             </ul>
-            <div className="mt-8 pt-6 border-t border-surface flex flex-col items-center gap-4">
+            <div className="py-4 border-t border-background flex flex-col items-center gap-4">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-2 text-text-main text-xl">
-                  <FaUserCircle />
+                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-text-main text-xl">
+                  <UserAvatar />
                   <span className="font-semibold">{user?.username}</span>
-                </div>
+                </Link>
                 {user?.role === 'ADMIN' && (
                     <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="btn-outline w-48">Admin Panel</Link>
                 )}

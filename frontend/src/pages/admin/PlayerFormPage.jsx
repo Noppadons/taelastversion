@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axios';
-import { FaSave } from 'react-icons/fa';
+import { FaSave, FaUpload } from 'react-icons/fa';
 
 const STAT_DEFINITIONS = {
   'DOTA2': { 
@@ -25,6 +25,10 @@ const PlayerFormPage = () => {
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({ nickname: '', realName: '', imageUrl: '', role: '', teamId: '' });
     const [statsData, setStatsData] = useState({});
+    
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [preview, setPreview] = useState('');
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -36,11 +40,10 @@ const PlayerFormPage = () => {
                 if (isEditMode) {
                     const playerRes = await apiClient.get(`/players/${id}`);
                     const playerData = playerRes.data;
-                    setFormData({
-                        nickname: playerData.nickname || '', realName: playerData.realName || '',
-                        imageUrl: playerData.imageUrl || '', role: playerData.role || '',
-                        teamId: playerData.teamId || '',
-                    });
+                    setFormData(playerData);
+                    if (playerData.imageUrl) {
+                        setPreview(playerData.imageUrl);
+                    }
                     const playerTeam = teamsRes.data.data.find(t => t.id === playerData.teamId);
                     if (playerTeam) {
                         const gameName = normalizeGameName(playerTeam.game.name);
@@ -61,6 +64,14 @@ const PlayerFormPage = () => {
     const selectedTeam = useMemo(() => teams.find(t => t.id === parseInt(formData.teamId)), [teams, formData.teamId]);
     const gameForStats = selectedTeam?.game;
     const statsFields = gameForStats ? STAT_DEFINITIONS[normalizeGameName(gameForStats.name)] : null;
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          setSelectedFile(file);
+          setPreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -84,12 +95,31 @@ const PlayerFormPage = () => {
             return;
         }
         setLoading(true);
+        let finalImageUrl = formData.imageUrl;
+
+        if (selectedFile) {
+            setUploading(true);
+            const imageFormData = new FormData();
+            imageFormData.append('image', selectedFile);
+            try {
+                const uploadRes = await apiClient.post('/upload', imageFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                finalImageUrl = uploadRes.data.imageUrl;
+            } catch (err) {
+                setError('Image upload failed.'); setLoading(false); setUploading(false); return;
+            }
+            setUploading(false);
+        }
+
+        const playerPayload = { ...formData, imageUrl: finalImageUrl };
+        
         try {
             let playerId = id;
             if (isEditMode) {
-                await apiClient.put(`/players/${id}`, formData);
+                await apiClient.put(`/players/${id}`, playerPayload);
             } else {
-                const response = await apiClient.post('/players', formData);
+                const response = await apiClient.post('/players', playerPayload);
                 playerId = response.data.id;
             }
             if (gameForStats && statsData && Object.keys(statsData).length > 0) {
@@ -108,12 +138,7 @@ const PlayerFormPage = () => {
     };
 
     if (loading) {
-        return (
-            <div>
-                <h1 className="text-3xl font-bold mb-6 text-text-main">{isEditMode ? 'Loading Player Data...' : 'Create New Player'}</h1>
-                <div className="glass-card p-8"><p className="text-text-secondary">Loading form...</p></div>
-            </div>
-        );
+        return ( <div className="p-8"><h1 className="text-3xl font-bold mb-6 text-text-main">{isEditMode ? 'Loading Player Data...' : 'Create New Player'}</h1><div className="glass-card p-8"><p className="text-text-secondary">Loading form...</p></div></div>);
     }
 
     return (
@@ -145,15 +170,19 @@ const PlayerFormPage = () => {
                         </div>
                     </div>
                     <div>
-                        <label htmlFor="imageUrl" className="block text-sm font-medium text-text-secondary mb-1">Photo URL</label>
-                        <input type="text" id="imageUrl" name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="input-field bg-black/20 mb-2" />
-                        <div className="bg-black/20 rounded-lg p-4 h-48 flex items-center justify-center">
-                            {formData.imageUrl ? (
-                                <img src={formData.imageUrl} alt="Player Preview" className="h-full w-full object-cover rounded-md"/>
+                        <label className="block text-sm font-medium text-text-secondary mb-1">Player Photo</label>
+                        <div className="bg-black/20 rounded-lg p-4 h-48 flex items-center justify-center mb-2">
+                            {preview ? (
+                                <img src={preview} alt="Player Preview" className="h-full w-full object-cover rounded-md"/>
                             ) : (
                                 <p className="text-text-secondary text-sm">Image Preview</p>
                             )}
                         </div>
+                        <label htmlFor="imageUpload" className="btn-outline w-full cursor-pointer !py-2 !px-3 text-sm">
+                            <FaUpload className="mr-2"/> <span>{selectedFile ? selectedFile.name : 'Choose File'}</span>
+                        </label>
+                        <input type="file" id="imageUpload" onChange={handleFileChange} className="hidden" accept="image/*"/>
+                        {uploading && <p className="text-accent text-sm mt-2 text-center animate-pulse">Uploading image...</p>}
                     </div>
                 </div>
 
@@ -177,9 +206,9 @@ const PlayerFormPage = () => {
                 
                 {error && <p className="text-red-500 mt-6">{error}</p>}
                 <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-4">
-                    <button type="submit" className="btn-primary bg-accent hover:shadow-accent/50" disabled={loading}>
+                    <button type="submit" className="btn-primary" disabled={loading || uploading}>
                         <FaSave className="mr-2" />
-                        {loading ? 'Saving...' : (isEditMode ? 'Update Player' : 'Create Player')}
+                        {loading || uploading ? 'Saving...' : (isEditMode ? 'Update Player' : 'Create Player')}
                     </button>
                     <Link to="/admin/manage-players" className="btn-ghost">Cancel</Link>
                 </div>

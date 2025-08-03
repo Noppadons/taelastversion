@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../api/axios';
 import SocialShare from '../components/SocialShare';
+import CommentSection from '../components/CommentSection';
 
 const SingleNewsPage = () => {
   const { id } = useParams(); 
@@ -52,7 +53,7 @@ const SingleNewsPage = () => {
         <article className="max-w-4xl mx-auto">
           <header className="mb-12">
             <Link to="/news" className="text-accent hover:underline text-sm font-semibold">
-              &larr; ข่าว
+              &larr; NEWS
             </Link>
             <h1 className="text-3xl md:text-5xl font-extrabold text-text-main leading-tight mt-4">
               {article.title}
@@ -84,7 +85,7 @@ const SingleNewsPage = () => {
 
         {relatedNews.length > 0 && (
             <aside className="max-w-4xl mx-auto mt-16 pt-8 border-t border-surface">
-                <h2 className="text-2xl font-bold text-text-main mb-6">ข่าวที่เกี่ยวข้อง</h2>
+                <h2 className="text-2xl font-bold text-text-main mb-6">Related News</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {relatedNews.map(related => (
                         <Link key={related.id} to={`/news/${related.id}`} className="group block bg-surface rounded-lg overflow-hidden hover:opacity-80 transition-opacity">
@@ -97,6 +98,8 @@ const SingleNewsPage = () => {
                 </div>
             </aside>
         )}
+
+        <CommentSection articleId={id} articleType="news" />
       </main>
     </div>
   );

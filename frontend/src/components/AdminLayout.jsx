@@ -1,27 +1,24 @@
 import React from 'react';
-import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
+import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaTachometerAlt, FaShieldAlt, FaNewspaper, FaBook, FaUserFriends, FaSignOutAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaShieldAlt, FaNewspaper, FaBook, FaUserFriends, FaSignOutAlt, FaComments } from 'react-icons/fa';
 
 const AdminLayout = () => {
   const { logout } = useAuth();
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    window.location.assign('/');
   };
 
-  // 1. สร้าง Array ของเมนูเพื่อจัดการง่ายขึ้น
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <FaTachometerAlt /> },
     { name: 'Manage Teams', path: '/admin/manage-teams', icon: <FaShieldAlt /> },
     { name: 'Manage Players', path: '/admin/manage-players', icon: <FaUserFriends /> },
     { name: 'Manage News', path: '/admin/manage-news', icon: <FaNewspaper /> },
     { name: 'Manage Metas', path: '/admin/manage-metas', icon: <FaBook /> },
+    { name: 'Manage Comments', path: '/admin/manage-comments', icon: <FaComments /> },
   ];
 
-  // 2. สไตล์สำหรับ NavLink ที่ active และไม่ active
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 ${
       isActive
@@ -30,11 +27,8 @@ const AdminLayout = () => {
     }`;
 
   return (
-    // 3. เปลี่ยนดีไซน์ของ Layout หลัก
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
       <aside className="w-64 bg-surface/30 backdrop-blur-xl border-r border-white/10 flex flex-col p-4">
-        {/* Sidebar Header */}
         <div className="text-center py-4 mb-4">
           <Link to="/" className="text-2xl font-bold text-accent hover:opacity-80 transition-opacity">
             TAE-ESPORT
@@ -42,12 +36,10 @@ const AdminLayout = () => {
           <p className="text-xs text-text-secondary">ADMIN PANEL</p>
         </div>
         
-        {/* Navigation Menu */}
         <nav className="flex-grow">
           <ul className="space-y-2">
             {menuItems.map((item) => (
               <li key={item.name}>
-                {/* 4. ใช้ NavLink เพื่อทำ Active Styling */}
                 <NavLink to={item.path} className={navLinkClass} end={item.path === '/admin'}>
                   <span className="text-lg">{item.icon}</span>
                   <span className="font-semibold">{item.name}</span>
@@ -57,7 +49,6 @@ const AdminLayout = () => {
           </ul>
         </nav>
         
-        {/* Logout Section */}
         <div className="mt-auto">
           <button 
             onClick={handleLogout}
@@ -69,7 +60,6 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </main>

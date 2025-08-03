@@ -11,6 +11,10 @@ const playerRoutes = require('./routes/players');
 const newsRoutes = require('./routes/news');
 const metaRoutes = require('./routes/metas');
 const authRoutes = require('./routes/auth');
+const commentRoutes = require('./routes/comments');
+const uploadRoutes = require('./routes/upload');
+const adminCommentRoutes = require('./routes/admin_comments');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 
@@ -23,6 +27,10 @@ app.use('/api/players', playerRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/metas', metaRoutes); 
 app.use('/api/auth', authRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/admin/comments', adminCommentRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Route ทดสอบ
 app.get('/', (req, res) => {
