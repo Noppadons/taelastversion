@@ -6,10 +6,13 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Poppins', 'sans-serif'],
+      },
       colors: {
-        'background': '#111827',
-        'surface': '#1F2937',
-        'accent': '#DC2626',
+        'background': '#030712',
+        'surface': '#111827',
+        'accent': '#22d3ee',
         'text-main': '#F9FAFB',
         'text-secondary': '#9CA3AF',
       }

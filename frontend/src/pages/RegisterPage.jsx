@@ -1,32 +1,30 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import apiClient from '../api/axios';
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+    if (password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+    }
     try {
-      const response = await apiClient.post('/auth/login', { username, password });
-      const userData = response.data;
-      if (userData.token) {
-        login(userData);
-        // ตรวจสอบ role แล้วส่งไปคนละหน้า
-        if (userData.role === 'ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-      }
+      await apiClient.post('/auth/register', { username, password });
+      setSuccess('Registration successful! Redirecting to login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
-      setError('Invalid username or password.');
+      setError(err.response?.data?.error || 'Registration failed.');
     }
   };
 
@@ -42,27 +40,28 @@ const LoginPage = () => {
             <Link to="/" className="text-3xl font-bold text-accent hover:opacity-80 transition-opacity">
               TAE-ESPORT
             </Link>
-            <p className="text-text-secondary mt-2">Login to your Account</p>
+            <p className="text-text-secondary mt-2">Create a Fan Account</p>
           </div>
           
           <div className="form-control">
             <label className="label"><span className="label-text text-text-secondary">Username</span></label>
-            <input type="text" placeholder="username" className="input-field bg-black/20" value={username} onChange={(e) => setUsername(e.target.value)} required />
+            <input type="text" placeholder="Choose a username" className="input-field bg-black/20" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
           
           <div className="form-control">
             <label className="label"><span className="label-text text-text-secondary">Password</span></label>
-            <input type="password" placeholder="password" className="input-field bg-black/20" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input type="password" placeholder="6+ characters" className="input-field bg-black/20" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {success && <p className="text-green-400 text-sm text-center">{success}</p>}
           
           <div className="form-control pt-4">
-            <button type="submit" className="btn-primary w-full bg-accent hover:shadow-accent/50">Login</button>
+            <button type="submit" className="btn-primary w-full bg-accent hover:shadow-accent/50">Register</button>
           </div>
           <div className="text-center text-sm">
-            <span className="text-text-secondary">Don't have an account? </span>
-            <Link to="/register" className="text-accent hover:underline">Register now</Link>
+            <span className="text-text-secondary">Already have an account? </span>
+            <Link to="/login" className="text-accent hover:underline">Login here</Link>
           </div>
         </form>
       </div>
@@ -70,4 +69,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

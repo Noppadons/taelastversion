@@ -5,13 +5,13 @@ import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
 
 const MetaManagementCard = ({ guide, onDelete }) => {
   return (
-    <div className="bg-surface rounded-lg shadow-lg flex flex-col transition-all duration-300 hover:shadow-accent/40 hover:-translate-y-1">
+    <div className="glass-card flex flex-col transition-all duration-300 group hover:border-accent/50">
       <div className="p-4 flex-grow">
         <p className="text-xs font-bold text-accent uppercase">{guide.game.name}</p>
-        <h3 className="font-bold text-lg text-text-main leading-tight mt-1 h-14 overflow-hidden">{guide.title}</h3>
+        <h3 className="font-bold text-lg text-text-main leading-tight mt-1 h-14 overflow-hidden group-hover:text-accent transition-colors">{guide.title}</h3>
         <p className="text-xs text-text-secondary mt-2">by {guide.author}</p>
       </div>
-      <div className="p-4 bg-background/50 rounded-b-lg border-t border-surface flex justify-between items-center">
+      <div className="p-4 bg-black/20 rounded-b-2xl border-t border-white/10 flex justify-between items-center">
         <p className="text-xs text-text-secondary font-mono">ID: {guide.id}</p>
         <div className="space-x-2">
           <Link to={`/admin/manage-metas/edit/${guide.id}`} className="btn btn-xs btn-ghost text-blue-400 hover:bg-blue-400 hover:text-white" title="Edit">
@@ -66,13 +66,13 @@ const ManageMetasPage = () => {
           <h1 className="text-3xl font-bold text-text-main">Manage Meta Guides</h1>
           <p className="text-text-secondary mt-1">Manage all strategy guides and analyses.</p>
         </div>
-        <Link to="/admin/manage-metas/new" className="btn-primary">
+        <Link to="/admin/manage-metas/new" className="btn-primary bg-accent hover:shadow-accent/50">
           <FaPlus className="mr-2" /> Add New Guide
         </Link>
       </div>
-      <div className="bg-surface p-4 rounded-lg shadow-lg flex items-center gap-4">
+      <div className="glass-card p-4 flex items-center gap-4">
         <div className="relative flex-grow">
-          <input type="text" placeholder="Search guides..." className="input-field pl-10" />
+          <input type="text" placeholder="Search guides..." className="input-field bg-transparent border-none pl-10" />
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
         </div>
       </div>
@@ -83,7 +83,7 @@ const ManageMetasPage = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center bg-surface rounded-lg p-12">
+        <div className="text-center glass-card p-12">
           <h3 className="text-2xl font-bold text-text-main">No Guides Found</h3>
           <p className="text-text-secondary mt-2">Click "Add New Guide" to get started.</p>
         </div>

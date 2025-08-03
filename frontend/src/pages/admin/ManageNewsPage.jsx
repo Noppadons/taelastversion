@@ -5,17 +5,17 @@ import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
 
 const NewsManagementCard = ({ article, onDelete }) => {
   return (
-    <div className="bg-surface rounded-lg shadow-lg flex flex-col transition-all duration-300 hover:shadow-accent/40 hover:-translate-y-1">
-      <div className="h-40 bg-background rounded-t-lg">
-        <img src={article.imageUrl || 'https://via.placeholder.com/400x250?text=News'} alt={article.title} className="w-full h-full object-cover rounded-t-lg" />
+    <div className="glass-card flex flex-col transition-all duration-300 group hover:border-accent/50">
+      <div className="h-40 bg-background rounded-t-2xl">
+        <img src={article.imageUrl || 'https://via.placeholder.com/400x250?text=News'} alt={article.title} className="w-full h-full object-cover rounded-t-2xl" />
       </div>
       <div className="p-4 flex-grow">
-        <h3 className="font-bold text-lg text-text-main leading-tight h-14 overflow-hidden">{article.title}</h3>
+        <h3 className="font-bold text-lg text-text-main leading-tight h-14 overflow-hidden group-hover:text-accent transition-colors">{article.title}</h3>
         <p className="text-xs text-text-secondary mt-2">
-          {new Date(article.publishedAt).toLocaleDateString()} by {article.author}
+          {new Date(article.publishedAt).toLocaleDateString()}
         </p>
       </div>
-      <div className="p-4 bg-background/50 rounded-b-lg border-t border-surface flex justify-between items-center">
+      <div className="p-4 bg-black/20 rounded-b-2xl border-t border-white/10 flex justify-between items-center">
         <p className="text-xs text-text-secondary font-mono">ID: {article.id}</p>
         <div className="space-x-2">
           <Link to={`/admin/manage-news/edit/${article.id}`} className="btn btn-xs btn-ghost text-blue-400 hover:bg-blue-400 hover:text-white" title="Edit">
@@ -70,13 +70,13 @@ const ManageNewsPage = () => {
           <h1 className="text-3xl font-bold text-text-main">Manage News</h1>
           <p className="text-text-secondary mt-1">Manage all news articles and updates.</p>
         </div>
-        <Link to="/admin/manage-news/new" className="btn-primary">
+        <Link to="/admin/manage-news/new" className="btn-primary bg-accent hover:shadow-accent/50">
           <FaPlus className="mr-2" /> Add New Article
         </Link>
       </div>
-      <div className="bg-surface p-4 rounded-lg shadow-lg flex items-center gap-4">
+      <div className="glass-card p-4 flex items-center gap-4">
         <div className="relative flex-grow">
-          <input type="text" placeholder="Search articles..." className="input-field pl-10" />
+          <input type="text" placeholder="Search articles..." className="input-field bg-transparent border-none pl-10" />
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
         </div>
       </div>
@@ -87,7 +87,7 @@ const ManageNewsPage = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center bg-surface rounded-lg p-12">
+        <div className="text-center glass-card p-12">
           <h3 className="text-2xl font-bold text-text-main">No Articles Found</h3>
           <p className="text-text-secondary mt-2">Click "Add New Article" to get started.</p>
         </div>

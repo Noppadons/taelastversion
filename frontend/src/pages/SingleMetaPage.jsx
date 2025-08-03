@@ -1,5 +1,3 @@
-// frontend/src/pages/SingleMetaPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../api/axios';
@@ -25,9 +23,7 @@ const SingleMetaPage = () => {
     fetchGuide();
   }, [id]);
 
-  if (loading) {
-    return <div className="text-center p-8 text-text-secondary">Loading guide...</div>;
-  }
+  if (loading) return <p className="text-center p-8 text-text-secondary">Loading guide...</p>;
 
   if (error || !guide) {
     return (
@@ -47,16 +43,16 @@ const SingleMetaPage = () => {
           <p className="text-text-secondary mt-4">By {guide.author}</p>
         </div>
       </header>
-
+      
       <main className="container mx-auto px-4 mt-8">
         <div className="bg-surface p-8 md:p-12 rounded-lg shadow-2xl max-w-4xl mx-auto">
           <article className="prose prose-lg prose-invert max-w-none text-text-secondary prose-headings:text-text-main prose-strong:text-text-main prose-a:text-accent hover:prose-a:opacity-80">
-            {guide.content.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+            {String(guide.content).split('\n').map((paragraph, index) => (
+              paragraph.trim() !== '' && <p key={index}>{paragraph}</p>
             ))}
           </article>
-          <div className="mt-12 border-t border-gray-700 pt-8">
-            <Link to="/meta" className="text-accent hover:underline">&larr; Back to all guides</Link>
+          <div className="mt-12 pt-8 border-t border-surface">
+            <Link to="/meta" className="btn-ghost">&larr; ย้อนกลับ</Link>
           </div>
         </div>
       </main>

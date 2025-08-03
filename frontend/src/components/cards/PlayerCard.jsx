@@ -1,12 +1,10 @@
-// frontend/src/components/cards/PlayerCard.jsx
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
 const PlayerCard = ({ player }) => {
   return (
     <motion.div 
-      className="bg-surface rounded-lg text-center shadow-lg overflow-hidden"
+      className="bg-surface rounded-lg text-center shadow-lg overflow-hidden h-full"
       whileHover={{ y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.4)" }}
       transition={{ duration: 0.2 }}
     >

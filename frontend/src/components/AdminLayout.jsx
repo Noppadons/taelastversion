@@ -1,38 +1,72 @@
-// frontend/src/components/AdminLayout.jsx
-
 import React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaTachometerAlt, FaShieldAlt, FaNewspaper, FaBook, FaUserFriends, FaSignOutAlt } from 'react-icons/fa';
 
 const AdminLayout = () => {
   const { logout } = useAuth();
-  const navigate = useNavigate(); // เรายังคงใช้ navigate สำหรับส่วนอื่นได้ แต่ไม่ใช่ตอน logout
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout(); // สั่งให้ออกจากระบบ (ลบ Token)
-    window.location.assign('/'); // บังคับให้โหลดหน้า Home ใหม่ทั้งหมด
+    logout();
+    window.location.assign('/');
   };
 
+  // 1. สร้าง Array ของเมนูเพื่อจัดการง่ายขึ้น
+  const menuItems = [
+    { name: 'Dashboard', path: '/admin', icon: <FaTachometerAlt /> },
+    { name: 'Manage Teams', path: '/admin/manage-teams', icon: <FaShieldAlt /> },
+    { name: 'Manage Players', path: '/admin/manage-players', icon: <FaUserFriends /> },
+    { name: 'Manage News', path: '/admin/manage-news', icon: <FaNewspaper /> },
+    { name: 'Manage Metas', path: '/admin/manage-metas', icon: <FaBook /> },
+  ];
+
+  // 2. สไตล์สำหรับ NavLink ที่ active และไม่ active
+  const navLinkClass = ({ isActive }) =>
+    `flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 ${
+      isActive
+        ? 'bg-accent/80 text-white shadow-lg'
+        : 'text-text-secondary hover:bg-surface hover:text-text-main'
+    }`;
+
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    // 3. เปลี่ยนดีไซน์ของ Layout หลัก
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 p-4 flex flex-col">
-        <h1 className="text-2xl font-bold text-secondary mb-8">Admin Panel</h1>
+      <aside className="w-64 bg-surface/30 backdrop-blur-xl border-r border-white/10 flex flex-col p-4">
+        {/* Sidebar Header */}
+        <div className="text-center py-4 mb-4">
+          <Link to="/" className="text-2xl font-bold text-accent hover:opacity-80 transition-opacity">
+            TAE-ESPORT
+          </Link>
+          <p className="text-xs text-text-secondary">ADMIN PANEL</p>
+        </div>
+        
+        {/* Navigation Menu */}
         <nav className="flex-grow">
-          <ul>
-            <li><Link to="/admin" className="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</Link></li>
-            <li><Link to="/admin/manage-teams" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Teams</Link></li>
-            <li><Link to="/admin/manage-news" className="block py-2 px-4 rounded hover:bg-gray-700">Manage News</Link></li>
-            <li><Link to="/admin/manage-metas" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Metas</Link></li>
-            <li><Link to="/admin/manage-players" className="block py-2 px-4 rounded hover:bg-gray-700">Manage Players</Link></li>
+          <ul className="space-y-2">
+            {menuItems.map((item) => (
+              <li key={item.name}>
+                {/* 4. ใช้ NavLink เพื่อทำ Active Styling */}
+                <NavLink to={item.path} className={navLinkClass} end={item.path === '/admin'}>
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-semibold">{item.name}</span>
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </nav>
-        <button 
-          onClick={handleLogout}
-          className="w-full mt-8 btn bg-red-600 hover:bg-red-700 text-white border-none"
-        >
-          Logout
-        </button>
+        
+        {/* Logout Section */}
+        <div className="mt-auto">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-4 py-3 rounded-lg text-text-secondary hover:bg-red-500/20 hover:text-red-400 transition-colors duration-200"
+          >
+            <span className="text-lg"><FaSignOutAlt /></span>
+            <span className="font-semibold">Logout</span>
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}

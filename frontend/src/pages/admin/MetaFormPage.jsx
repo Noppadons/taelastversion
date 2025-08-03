@@ -8,41 +8,29 @@ const MetaFormPage = () => {
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
   const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    author: 'TAE Analysis',
-    gameId: '',
-  });
+  const [formData, setFormData] = useState({ title: '', content: '', author: 'TAE Analysis', gameId: '' });
 
   useEffect(() => {
+    setLoading(true);
     const fetchGames = async () => {
-        try {
-            const response = await apiClient.get('/games');
-            setGames(response.data);
-        } catch (err) {
-            console.error("Failed to fetch games", err);
-        }
+      try {
+        const response = await apiClient.get('/games');
+        setGames(response.data);
+      } catch (err) { console.error("Failed to fetch games", err); }
     };
-    fetchGames();
-    if (isEditMode) {
-        const fetchGuide = async () => {
-            setLoading(true);
-            try {
-                const response = await apiClient.get(`/metas/${id}`);
-                setFormData(response.data);
-            } catch (err) {
-                setError('Failed to fetch meta guide data.');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchGuide();
-    }
+    const fetchGuide = async () => {
+      if (isEditMode) {
+        try {
+          const response = await apiClient.get(`/metas/${id}`);
+          setFormData(response.data);
+        } catch (err) { setError('Failed to fetch meta guide data.'); }
+      }
+    };
+    Promise.all([fetchGames(), fetchGuide()]).finally(() => setLoading(false));
   }, [id, isEditMode]);
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({ ...prevState, [name]: value }));
@@ -50,17 +38,16 @@ const MetaFormPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.gameId) {
-      setError('Please select a game.');
+    if (!formData.gameId || !formData.title) {
+      setError('Please select a game and enter a title.');
       return;
     }
     setLoading(true);
-    const payload = { ...formData, gameId: parseInt(formData.gameId) };
     try {
       if (isEditMode) {
-        await apiClient.put(`/metas/${id}`, payload);
+        await apiClient.put(`/metas/${id}`, formData);
       } else {
-        await apiClient.post('/metas', payload);
+        await apiClient.post('/metas', formData);
       }
       alert(`Guide ${isEditMode ? 'updated' : 'created'} successfully!`);
       navigate('/admin/manage-metas');
@@ -71,40 +58,43 @@ const MetaFormPage = () => {
     }
   };
 
-  if (loading && isEditMode) return <p>Loading form...</p>;
+  if (loading) return <p className="text-text-secondary p-8">Loading form...</p>;
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6 text-text-main">{isEditMode ? `Edit Guide: ${formData.title}` : 'Create New Guide'}</h1>
-      <form onSubmit={handleSubmit} className="bg-surface p-8 rounded-lg shadow-lg max-w-4xl">
+      <form onSubmit={handleSubmit} className="glass-card p-8 max-w-4xl">
         <div className="space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-text-secondary mb-1">Title</label>
-            <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} className="input-field" required />
+            <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} className="input-field bg-black/20" required />
           </div>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label htmlFor="gameId" className="block text-sm font-medium text-text-secondary mb-1">Game</label>
-              <select id="gameId" name="gameId" value={formData.gameId} onChange={handleChange} className="select-field" required>
+              <select id="gameId" name="gameId" value={formData.gameId} onChange={handleChange} className="select-field bg-black/20" required>
                 <option value="" disabled>Select a game</option>
                 {games.map(game => (<option key={game.id} value={game.id}>{game.name}</option>))}
               </select>
             </div>
             <div>
               <label htmlFor="author" className="block text-sm font-medium text-text-secondary mb-1">Author</label>
-              <input type="text" id="author" name="author" value={formData.author} onChange={handleChange} className="input-field" />
+              <input type="text" id="author" name="author" value={formData.author} onChange={handleChange} className="input-field bg-black/20" />
             </div>
           </div>
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-text-secondary mb-1">Content</label>
-            <textarea id="content" name="content" value={formData.content} onChange={handleChange} className="textarea-field" rows="12" required></textarea>
+            <textarea
+              id="content" name="content" value={formData.content}
+              onChange={handleChange} className="textarea-field bg-black/20"
+              rows={15} required />
           </div>
         </div>
         
         {error && <p className="text-red-500 mt-6">{error}</p>}
 
-        <div className="mt-8 pt-6 border-t border-gray-700 flex items-center gap-4">
-          <button type="submit" className="btn-primary" disabled={loading}>
+        <div className="mt-8 pt-6 border-t border-white/10 flex items-center gap-4">
+          <button type="submit" className="btn-primary bg-accent hover:shadow-accent/50" disabled={loading}>
             <FaSave className="mr-2" />
             {loading ? 'Saving...' : (isEditMode ? 'Update Guide' : 'Create Guide')}
           </button>

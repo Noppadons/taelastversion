@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaUserCircle } from 'react-icons/fa';
 
 const Navbar = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const handleLogout = () => {
-    window.location.assign('/');
     logout();
+    window.location.assign('/');
   };
   
   const navLinks = [
@@ -37,13 +38,20 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           {isAuthenticated ? (
             <>
-              <Link to="/admin" className="btn-outline !py-1 !px-3 text-sm">Admin Panel</Link>
+              <div className="flex items-center gap-2 text-text-main">
+                <FaUserCircle />
+                <span className="font-semibold">{user?.username}</span>
+              </div>
+              {user?.role === 'ADMIN' && (
+                  <Link to="/admin" className="btn-outline !py-1 !px-3 text-sm">Admin Panel</Link>
+              )}
               <button onClick={handleLogout} className="btn-ghost !py-1 !px-3 text-sm">Logout</button>
             </>
           ) : (
-            <Link to="/login" className="btn-outline !py-1 !px-3 text-sm">
-              Admin Login
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/login" className="btn-ghost !py-1 !px-3 text-sm">Login</Link>
+              <Link to="/register" className="btn-outline !py-1 !px-3 text-sm">Register</Link>
+            </div>
           )}
         </div>
       </div>

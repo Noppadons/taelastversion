@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    body {
+        @apply bg-background text-text-secondary font-sans;
+    }
+}
+
 /* ===== Custom Component Styles ===== */
 @layer components {
   /* --- Primary Button --- */
@@ -25,7 +31,7 @@
     @apply hover:bg-surface hover:text-text-main;
   }
 
-  /* --- Form Input Styling (ฉบับแก้ไข) --- */
+  /* --- Form Input Styling --- */
   .input-field {
     @apply w-full rounded-lg px-4 py-2 bg-background border-2 border-surface text-text-main transition-colors duration-300;
     @apply focus:border-accent focus:ring-0;
@@ -37,5 +43,10 @@
   .select-field {
     @apply w-full rounded-lg pl-4 pr-10 py-2 bg-background border-2 border-surface text-text-main transition-colors duration-300 appearance-none;
     @apply focus:border-accent focus:ring-0;
+  }
+
+  /* --- Glassmorphism Card Style --- */
+  .glass-card {
+    @apply bg-surface/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-lg;
   }
 }

@@ -1,11 +1,8 @@
-// frontend/src/components/cards/MetaGuideCard.jsx
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const MetaGuideCard = ({ guide }) => {
-  // Animation variants for staggering children
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1 }

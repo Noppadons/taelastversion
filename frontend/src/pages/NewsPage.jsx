@@ -1,9 +1,7 @@
-// frontend/src/pages/NewsPage.jsx (ฉบับแปลงโฉม)
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/axios';
-import NewsCard from '../components/cards/NewsCard'; // 1. Import NewsCard
+import NewsCard from '../components/cards/NewsCard';
 
 const NewsPage = () => {
   const [articles, setArticles] = useState([]);
@@ -22,11 +20,9 @@ const NewsPage = () => {
         setTimeout(() => setLoading(false), 500);
       }
     };
-
     fetchNews();
   }, []);
 
-  // 2. แยกข่าวเด่น (ข่าวแรก) ออกมาจากข่าวที่เหลือ
   const featuredArticle = useMemo(() => articles[0], [articles]);
   const otherArticles = useMemo(() => articles.slice(1), [articles]);
 
@@ -36,7 +32,6 @@ const NewsPage = () => {
 
   return (
     <div className="bg-background min-h-screen">
-      {/* ===== Page Header ===== */}
       <section className="bg-surface py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-text-main">ข่าวสารและอัพเดท</h1>
@@ -50,7 +45,6 @@ const NewsPage = () => {
         ) : (
           articles.length > 0 ? (
             <>
-              {/* ===== Featured Article Section ===== */}
               <section className="mb-16">
                 <Link to={`/news/${featuredArticle.id}`} className="group block">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-surface rounded-lg shadow-lg overflow-hidden">
@@ -69,18 +63,17 @@ const NewsPage = () => {
                       <p className="text-text-secondary mb-6">
                         {featuredArticle.content.substring(0, 150)}...
                       </p>
-                      <span className="font-bold text-text-main group-hover:underline">อ่านต่อ &rarr;</span>
+                      <span className="font-bold text-text-main group-hover:underline">อ่านต่อที่นี่ &rarr;</span>
                     </div>
                   </div>
                 </Link>
               </section>
 
-              {/* ===== Other Articles Grid ===== */}
               {otherArticles.length > 0 && (
                 <section>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {otherArticles.map(article => (
-                      <NewsCard key={article.id} article={article} /> // 3. เรียกใช้ NewsCard
+                      <NewsCard key={article.id} article={article} />
                     ))}
                   </div>
                 </section>

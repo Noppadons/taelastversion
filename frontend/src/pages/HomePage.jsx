@@ -1,3 +1,4 @@
+// frontend/src/pages/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/axios';
@@ -14,8 +15,12 @@ const HomePage = () => {
           apiClient.get('/teams'),
           apiClient.get('/news')
         ]);
-        setTeams(teamsResponse.data.slice(0, 3));
-        setNews(newsResponse.data.slice(0, 3));
+        if (teamsResponse.data && Array.isArray(teamsResponse.data.data)) {
+            setTeams(teamsResponse.data.data.slice(0, 3));
+        }
+        if (newsResponse.data && Array.isArray(newsResponse.data)) {
+            setNews(newsResponse.data.slice(0, 3));
+        }
       } catch (error) {
         console.error("Failed to fetch homepage data", error);
       } finally {
@@ -34,11 +39,11 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-black opacity-60"></div>
         <div className="relative z-10 p-4">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-wider text-text-main"
-              style={{ textShadow: '0 0 15px rgba(220, 38, 38, 0.7)' }}>
-            TAE E-SPORT By.RIMURU
+              style={{ textShadow: '0 0 15px rgba(34, 211, 238, 0.7)' }}>
+            TAE E-SPORT 
           </h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-text-secondary">
-            ยินดีต้อนรับสู่บ้านอย่างเป็นทางการของ TAE-ESPORT เรามุ่งมั่นสู่ความเป็นเลิศ การทำงานเป็นทีม และการครองความเหนือกว่าคู่แข่ง
+            ยินดีต้อนรับสู่บ้านอย่างเป็นทางการของ TAE E-SPORT เรามุ่งมั่นสู่ความเป็นเลิศ การทำงานเป็นทีม และการครองความเหนือกว่าคู่แข่ง
           </p>
           <Link to="/teams" className="mt-8 inline-block btn-primary text-lg">
             ดูทีมของเรา
@@ -69,7 +74,7 @@ const HomePage = () => {
 
       <section className="bg-surface py-16">
         <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12 text-text-main">ข่าวสารล่าสุด</h2>
+            <h2 className="text-3xl font-bold text-center mb-12 text-text-main">ข่าวล่าสุด</h2>
             {loading ? <p className="text-center text-text-secondary">Loading news...</p> : (
               <div className="space-y-8 max-w-4xl mx-auto">
                 {news.map(article => (

@@ -1,8 +1,6 @@
-// frontend/src/components/cards/NewsCard.jsx
-
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const NewsCard = ({ article }) => {
   return (
@@ -10,6 +8,7 @@ const NewsCard = ({ article }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="h-full"
     >
       <Link to={`/news/${article.id}`} className="group block bg-surface rounded-lg shadow-lg overflow-hidden h-full hover:shadow-accent/40 transition-shadow duration-300">
         <div className="h-48 bg-background">

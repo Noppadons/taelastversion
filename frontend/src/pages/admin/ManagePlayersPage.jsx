@@ -5,16 +5,16 @@ import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
 
 const PlayerManagementCard = ({ player, onDelete }) => {
   return (
-    <div className="bg-surface rounded-lg shadow-lg flex flex-col transition-all duration-300 hover:shadow-accent/40 hover:-translate-y-1">
-      <div className="h-40 bg-background rounded-t-lg flex items-center justify-center p-2">
+    <div className="glass-card flex flex-col transition-all duration-300 group hover:border-accent/50">
+      <div className="h-40 bg-background rounded-t-2xl flex items-center justify-center p-2">
         <img src={player.imageUrl || 'https://via.placeholder.com/150'} alt={player.nickname} className="w-28 h-28 object-cover rounded-full border-4 border-surface" />
       </div>
       <div className="p-4 flex-grow text-center">
-        <h3 className="font-bold text-lg text-text-main truncate">{player.nickname}</h3>
+        <h3 className="font-bold text-lg text-text-main truncate group-hover:text-accent transition-colors">{player.nickname}</h3>
         <p className="text-sm text-accent font-semibold">{player.role || 'N/A'}</p>
         <p className="text-xs text-text-secondary mt-1">{player.team?.name || 'No Team'}</p>
       </div>
-      <div className="p-4 bg-background/50 rounded-b-lg border-t border-surface flex justify-between items-center">
+      <div className="p-4 bg-black/20 rounded-b-2xl border-t border-white/10 flex justify-between items-center">
         <p className="text-xs text-text-secondary font-mono">ID: {player.id}</p>
         <div className="space-x-2">
           <Link to={`/admin/manage-players/edit/${player.id}`} className="btn btn-xs btn-ghost text-blue-400 hover:bg-blue-400 hover:text-white" title="Edit">
@@ -60,7 +60,7 @@ const ManagePlayersPage = () => {
     }
   };
 
-  if (loading) return <p className="text-text-secondary">Loading players...</p>;
+  if (loading) return <p className="text-text-secondary p-8">Loading players...</p>;
 
   return (
     <div className="space-y-8">
@@ -69,13 +69,13 @@ const ManagePlayersPage = () => {
           <h1 className="text-3xl font-bold text-text-main">Manage Players</h1>
           <p className="text-text-secondary mt-1">Manage all players in your organization.</p>
         </div>
-        <Link to="/admin/manage-players/new" className="btn-primary">
+        <Link to="/admin/manage-players/new" className="btn-primary bg-accent hover:shadow-accent/50">
           <FaPlus className="mr-2" /> Add New Player
         </Link>
       </div>
-      <div className="bg-surface p-4 rounded-lg shadow-lg flex items-center gap-4">
+      <div className="glass-card p-4 flex items-center gap-4">
         <div className="relative flex-grow">
-          <input type="text" placeholder="Search players..." className="input-field pl-10" />
+          <input type="text" placeholder="Search players..." className="input-field bg-transparent border-none pl-10" />
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
         </div>
       </div>
@@ -86,7 +86,7 @@ const ManagePlayersPage = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center bg-surface rounded-lg p-12">
+        <div className="text-center glass-card p-12">
           <h3 className="text-2xl font-bold text-text-main">No Players Found</h3>
           <p className="text-text-secondary mt-2">Click "Add New Player" to get started.</p>
         </div>

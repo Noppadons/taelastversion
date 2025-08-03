@@ -1,42 +1,54 @@
 // backend/routes/auth.js
-
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, Role } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+// --- User Registration ---
+router.post('/register', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required.' });
+    }
+    try {
+        const existingUser = await prisma.user.findUnique({ where: { username } });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Username already exists.' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: {
+                username,
+                password: hashedPassword,
+                // role จะเป็น USER โดย default จาก schema
+            },
+        });
+        res.status(201).json({ message: 'User created successfully', userId: user.id });
+    } catch (error) {
+        res.status(500).json({ error: 'An error occurred during registration.' });
+    }
+});
+
+// --- User Login ---
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
   try {
-    // 1. หา user จาก username
-    const admin = await prisma.admin.findUnique({
-      where: { username },
-    });
-
-    if (!admin) {
-      return res.status(401).json({ error: 'Invalid credentials' }); // ไม่ควรบอกว่า username ไม่มีอยู่
+    const user = await prisma.user.findUnique({ where: { username } });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    // 2. เปรียบเทียบรหัสผ่านที่ส่งมากับรหัสผ่านที่เข้ารหัสไว้ใน DB
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
-
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    // 3. ถ้าทุกอย่างถูกต้อง สร้าง JWT Token
     const token = jwt.sign(
-      { adminId: admin.id, username: admin.username }, // ข้อมูลที่จะเก็บใน token
-      process.env.JWT_SECRET, // กุญแจลับ
-      { expiresIn: '1d' } // Token มีอายุ 1 วัน
+      { userId: user.id, username: user.username, role: user.role }, // <-- เพิ่ม role ใน token
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
     );
-
-    // 4. ส่ง Token กลับไปให้ Frontend
-    res.json({ token });
-
+    res.json({ token, role: user.role, username: user.username });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred during login' });
   }

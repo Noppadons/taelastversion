@@ -6,7 +6,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const authMiddleware = require('../middleware/authMiddleware');
 
-// PUBLIC
+// PUBLIC: Get all meta guides
 router.get('/', async (req, res) => {
   try {
     const guides = await prisma.metaGuide.findMany({
@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// PUBLIC: Get single meta guide by ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -35,7 +36,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PROTECTED
+// PROTECTED: Create new guide
 router.post('/', authMiddleware, async (req, res) => {
   const { title, content, author, gameId } = req.body;
   if (!title || !content || !gameId) {
@@ -56,18 +57,14 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// PROTECTED: Update guide
 router.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { title, content, author, gameId } = req.body;
   try {
     const updatedGuide = await prisma.metaGuide.update({
       where: { id: parseInt(id) },
-      data: {
-        title,
-        content,
-        author,
-        gameId: gameId ? parseInt(gameId) : undefined,
-      },
+      data: { title, content, author, gameId: gameId ? parseInt(gameId) : undefined },
     });
     res.json(updatedGuide);
   } catch (error) {
@@ -75,6 +72,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// PROTECTED: Delete guide
 router.delete('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params;
   try {

@@ -1,9 +1,7 @@
-// frontend/src/pages/SingleTeamPage.jsx (ฉบับแปลงโฉม)
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../api/axios';
-import PlayerCard from '../components/cards/PlayerCard'; // 1. Import PlayerCard
+import PlayerCard from '../components/cards/PlayerCard';
 
 const SingleTeamPage = () => {
   const { id } = useParams();
@@ -23,7 +21,6 @@ const SingleTeamPage = () => {
         setLoading(false);
       }
     };
-
     fetchTeam();
   }, [id]);
 
@@ -37,7 +34,7 @@ const SingleTeamPage = () => {
           <h2 className="text-2xl text-text-main">Team Not Found</h2>
           <p>The requested team could not be found.</p>
           <Link to="/teams" className="text-accent hover:underline mt-4 inline-block">
-            &larr; ย้อนกลับ
+            &larr; Back to all teams
           </Link>
         </div>
       );
@@ -45,7 +42,6 @@ const SingleTeamPage = () => {
 
   return (
     <div className="bg-background min-h-screen">
-      {/* ===== Team Banner Section ===== */}
       <section className="bg-surface pt-24 pb-12 text-center relative">
         <div className="container mx-auto px-4">
           <div className="flex justify-center mb-4">
@@ -61,24 +57,24 @@ const SingleTeamPage = () => {
       </section>
 
       <div className="container mx-auto p-8">
-        {/* ===== Team Description ===== */}
         {team.description && (
           <section className="max-w-4xl mx-auto text-center mb-16">
             <p className="text-lg text-text-secondary">{team.description}</p>
           </section>
         )}
         
-        {/* ===== Roster Section ===== */}
         <section>
-          <h2 className="text-4xl font-bold mb-8 text-text-main text-center">รายชื่อนักกีฬา</h2>
+          <h2 className="text-4xl font-bold mb-8 text-text-main text-center">นักกีฬาในสังกัด</h2>
           {team.players.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
               {team.players.map(player => (
-                <PlayerCard key={player.id} player={player} /> // 2. เรียกใช้ PlayerCard
+                <Link key={player.id} to={`/players/${player.id}`}>
+                    <PlayerCard player={player} />
+                </Link>
               ))}
             </div>
           ) : (
-            <p className="text-text-secondary text-center">ยังไม่มีผู้เล่นในทีมนี้</p>
+            <p className="text-text-secondary text-center">No players on this team yet.</p>
           )}
         </section>
 
