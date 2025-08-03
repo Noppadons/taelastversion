@@ -1,10 +1,13 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaUserCircle } from 'react-icons/fa';
+import { HiMenu, HiX } from 'react-icons/hi'; // Import icons for hamburger menu
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -21,21 +24,25 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-surface text-text-secondary sticky top-0 z-40 shadow-md">
+    <nav className="bg-surface text-text-secondary sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex justify-between items-center p-4">
-        <Link to="/" className="text-2xl font-bold text-accent hover:opacity-80 transition-opacity">
+        <Link to="/" className="text-2xl font-bold text-accent hover:opacity-80 transition-opacity z-50">
           TAE-ESPORT
         </Link>
+        
+        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.title}>
-              <Link to={link.path} className="text-lg hover:text-accent transition-colors">
+              <NavLink to={link.path} className={({isActive}) => `text-lg transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
                 {link.title}
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>
-        <div className="flex items-center space-x-4">
+
+        {/* Desktop Auth Buttons */}
+        <div className="hidden md:flex items-center space-x-4">
           {isAuthenticated ? (
             <>
               <div className="flex items-center gap-2 text-text-main">
@@ -54,7 +61,55 @@ const Navbar = () => {
             </div>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden z-50">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            {isMobileMenuOpen ? <HiX size={28} className="text-text-main" /> : <HiMenu size={28} className="text-text-main" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden absolute top-0 left-0 w-full h-screen bg-background pt-24"
+          >
+            <ul className="flex flex-col items-center gap-y-6">
+              {navLinks.map((link) => (
+                <li key={link.title}>
+                  <NavLink to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `text-2xl transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
+                    {link.title}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 pt-6 border-t border-surface flex flex-col items-center gap-4">
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-2 text-text-main text-xl">
+                  <FaUserCircle />
+                  <span className="font-semibold">{user?.username}</span>
+                </div>
+                {user?.role === 'ADMIN' && (
+                    <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="btn-outline w-48">Admin Panel</Link>
+                )}
+                <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="btn-ghost w-48">Logout</button>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-4 w-full">
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="btn-ghost w-48">Login</Link>
+                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="btn-outline w-48">Register</Link>
+              </div>
+            )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
