@@ -14,6 +14,7 @@ router.get('/', isLoggedInMiddleware, async (req, res) => {
       select: {
         id: true,
         username: true,
+        email: true,
         profileImageUrl: true,
         createdAt: true,
         role: true
@@ -54,22 +55,26 @@ router.put('/', isLoggedInMiddleware, upload.single('profileImage'), async (req,
 
     // 3. ถ้าไม่มีอะไรให้อัปเดต ก็ไม่ต้องทำอะไร
     if (Object.keys(updateData).length === 0) {
-      return res.status(200).json({ message: 'No changes to update.' });
+      return res.status(200).json({ 
+        message: 'No changes were made.',
+        profileImageUrl: user.profileImageUrl
+      });
     }
     
     // 4. อัปเดตข้อมูลลงฐานข้อมูล
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
-      select: { profileImageUrl: true }
+      select: { profileImageUrl: true, username: true }
     });
 
     res.status(200).json({ 
-      message: 'โปรไฟล์อัปเดตสำเร็จ', 
-      profileImageUrl: updatedUser.profileImageUrl 
+      message: 'โปรไฟล์อัปเดตสำเร็จ!', 
+      user: updatedUser
     });
 
   } catch (error) {
+    console.error("Profile update error:", error)
     res.status(500).json({ error: 'Failed to update profile.' });
   }
 });

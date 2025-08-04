@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // <-- เพิ่ม useEffect ที่นี่
 import apiClient from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { FaUser, FaCalendarAlt, FaUpload, FaSave } from 'react-icons/fa';
@@ -10,13 +10,14 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // States for form
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState('');
   
+  // States for feedback
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState('');
@@ -29,7 +30,7 @@ const ProfilePage = () => {
         if (response.data.profileImageUrl) {
           setPreview(response.data.profileImageUrl);
         } else {
-          setPreview(`https://ui-avatars.com/api/?name=${response.data.username.substring(0,1)}&background=111827&color=22d3ee&size=128`);
+          setPreview(`https://ui-avatars.com/api/?name=${response.data.username.substring(0,2)}&background=111827&color=22d3ee&size=128`);
         }
       } catch (err) {
         setError('Failed to load profile data.');
@@ -46,6 +47,7 @@ const ProfilePage = () => {
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
+      setSubmitSuccess(''); // Clear previous success message on new change
     }
   };
 
@@ -55,8 +57,13 @@ const ProfilePage = () => {
     setSubmitSuccess('');
 
     if (newPassword && newPassword !== confirmPassword) {
-      setSubmitError('New passwords do not match.');
+      setSubmitError('รหัสผ่านใหม่ไม่ตรงกัน');
       return;
+    }
+
+    if (!selectedFile && !newPassword) {
+        setSubmitError("No changes to save.");
+        return;
     }
 
     setIsSubmitting(true);
@@ -68,6 +75,10 @@ const ProfilePage = () => {
     if (currentPassword && newPassword) {
       formData.append('currentPassword', currentPassword);
       formData.append('newPassword', newPassword);
+    } else if (newPassword) {
+      setSubmitError("โปรดใส่รหัสผ่านปัจจุบันเพื่อเปลี่ยนรหัสผ่านใหม่");
+      setIsSubmitting(false);
+      return;
     }
 
     try {
@@ -81,9 +92,9 @@ const ProfilePage = () => {
       setConfirmPassword('');
       setSelectedFile(null);
       
-      if (response.data.profileImageUrl) {
-        setPreview(response.data.profileImageUrl);
-        updateUserProfile({ profileImageUrl: response.data.profileImageUrl });
+      if (response.data.user?.profileImageUrl) {
+        setPreview(response.data.user.profileImageUrl);
+        updateUserProfile({ profileImageUrl: response.data.user.profileImageUrl });
       }
 
     } catch (err) {
@@ -122,7 +133,7 @@ const ProfilePage = () => {
         <form onSubmit={handleSubmit} className="glass-card p-8">
           <h2 className="text-2xl font-bold text-text-main mb-6">Update Your Profile</h2>
           <div className="space-y-4">
-            <p className="text-sm text-text-secondary">To change your password, fill all three fields below. To only update your profile image, leave password fields blank and choose a new photo.</p>
+            <p className="text-sm text-text-secondary">หากต้องการเปลี่ยนรูปโปรไฟล์อย่างเดียว ให้เลือกรูปแล้วกด Save Changes ได้เลย หากต้องการเปลี่ยนรหัสผ่าน ต้องกรอกทั้ง 3 ช่องด้านล่างนี้</p>
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
               <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input-field bg-black/20" />
