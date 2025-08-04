@@ -1,16 +1,17 @@
-// frontend/src/pages/UserProfilePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+// --- ส่วนที่แก้ไข ---
+// เพิ่ม FaTwitch, FaYoutube, FaFacebook, FaEdit เข้าไปใน import
 import { FaTwitch, FaYoutube, FaFacebook, FaEdit } from 'react-icons/fa';
 
 const UserProfilePage = () => {
   const { username } = useParams();
-  const { user: loggedInUser } = useAuth(); // user ที่ login อยู่
+  const { user: loggedInUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
@@ -49,7 +50,6 @@ const UserProfilePage = () => {
               {socialLinks.facebook && <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-[#1877F2]"><FaFacebook size={24}/></a>}
             </div>
           </div>
-          {/* ปุ่ม Edit จะแสดงก็ต่อเมื่อเป็นเจ้าของโปรไฟล์ */}
           {isOwner && (
             <Link to="/profile/settings" className="btn-outline ml-auto">
               <FaEdit className="mr-2" /> Edit Profile
@@ -65,7 +65,6 @@ const UserProfilePage = () => {
             {profileData.bio || `${profileData.username} has not written a bio yet.`}
           </p>
         </div>
-        {/* ในอนาคต เราสามารถเพิ่มส่วนแสดงประวัติคอมเมนต์ของผู้ใช้ที่นี่ได้ */}
       </div>
     </div>
   );

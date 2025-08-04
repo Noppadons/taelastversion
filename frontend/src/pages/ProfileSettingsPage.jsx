@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { FaUpload, FaSave } from 'react-icons/fa';
+// --- ส่วนที่แก้ไข ---
+// เพิ่ม FaTwitch, FaYoutube, FaFacebook เข้าไปใน import
+import { FaUser, FaCalendarAlt, FaUpload, FaSave, FaTwitch, FaYoutube, FaFacebook } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const ProfileSettingsPage = () => {
   const { user, updateUserProfile } = useAuth();
@@ -120,7 +123,6 @@ const ProfileSettingsPage = () => {
       <div className="container mx-auto p-8 max-w-6xl">
         <form onSubmit={handleSubmit} className="glass-card p-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Image & Socials */}
             <div className="lg:col-span-1 space-y-6">
               <div>
                 <h3 className="text-xl font-bold text-text-main mb-2">Profile Picture</h3>
@@ -142,7 +144,6 @@ const ProfileSettingsPage = () => {
               </div>
             </div>
 
-            {/* Right Column: Bio & Password */}
             <div className="lg:col-span-2 space-y-6">
                 <div>
                     <h3 className="text-xl font-bold text-text-main mb-2">About Me (Bio)</h3>
