@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaUserCircle } from 'react-icons/fa';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,12 +11,21 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    // We use window.location.assign to ensure a full refresh and state reset
+    window.location.assign('/'); 
   };
   
-  const navLinks = [ /* ... */ ];
+  const navLinks = [
+    { title: 'Home', path: '/' },
+    { title: 'Teams', path: '/teams' },
+    { title: 'Players', path: '/players' },
+    { title: 'Meta', path: '/meta' },
+    { title: 'News', path: '/news' },
+    { title: 'Contact', path: '/contact' },
+  ];
 
-  const UserAvatar = () => (
-    <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center overflow-hidden">
+  const UserAvatar = ({ isMobile = false }) => (
+    <div className={`${isMobile ? 'w-10 h-10' : 'w-8 h-8'} rounded-full bg-surface flex items-center justify-center overflow-hidden flex-shrink-0`}>
         <img 
             src={user?.profileImageUrl || `https://ui-avatars.com/api/?name=${user?.username.substring(0,2)}&background=111827&color=22d3ee`} 
             alt="User Avatar"
@@ -31,6 +41,7 @@ const Navbar = () => {
           TAE-ESPORT
         </Link>
         
+        {/* Desktop Menu */}
         <ul className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <li key={link.title}>
@@ -41,6 +52,7 @@ const Navbar = () => {
           ))}
         </ul>
 
+        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           {isAuthenticated ? (
             <>
@@ -61,35 +73,38 @@ const Navbar = () => {
           )}
         </div>
 
+        {/* Mobile Menu Button */}
         <div className="md:hidden z-50">
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Open menu">
             {isMobileMenuOpen ? <HiX size={28} className="text-text-main" /> : <HiMenu size={28} className="text-text-main" />}
           </button>
         </div>
       </div>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden absolute top-full left-0 w-full bg-surface shadow-lg"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="md:hidden absolute top-0 left-0 w-full h-screen bg-background pt-24 pb-8 flex flex-col"
           >
-            <ul className="flex flex-col items-center gap-y-4 py-4">
+            <ul className="flex flex-col items-center gap-y-6">
               {navLinks.map((link) => (
                 <li key={link.title}>
-                  <NavLink to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `text-xl transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
+                  <NavLink to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={({isActive}) => `text-2xl transition-colors ${isActive ? 'text-accent' : 'hover:text-accent'}`}>
                     {link.title}
                   </NavLink>
                 </li>
               ))}
             </ul>
-            <div className="py-4 border-t border-background flex flex-col items-center gap-4">
+            <div className="mt-auto pt-6 border-t border-surface flex flex-col items-center gap-4">
             {isAuthenticated ? (
               <>
                 <Link to={`/users/${user?.username}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-text-main text-xl">
-                  <UserAvatar />
+                  <UserAvatar isMobile={true} />
                   <span className="font-semibold">{user?.username}</span>
                 </Link>
                 {user?.role === 'ADMIN' && (
