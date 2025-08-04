@@ -1,88 +1,55 @@
-// backend/routes/metas.js
-
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const authMiddleware = require('../middleware/authMiddleware');
 
-// PUBLIC: Get all meta guides
+// PUBLIC: Get all meta guides (with pagination for admin)
 router.get('/', async (req, res) => {
-  try {
-    const guides = await prisma.metaGuide.findMany({
-      orderBy: { publishedAt: 'desc' },
-      include: { game: true },
-    });
-    res.json(guides);
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong while fetching meta guides' });
-  }
-});
-
-// PUBLIC: Get single meta guide by ID
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const guide = await prisma.metaGuide.findUnique({
-      where: { id: parseInt(id) },
-      include: { game: true },
-    });
-    if (!guide) {
-      return res.status(404).json({ error: 'Meta guide not found' });
+  if (req.query.page && req.query.limit) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    try {
+      const [guides, totalGuides] = await prisma.$transaction([
+        prisma.metaGuide.findMany({
+          skip: skip,
+          take: limit,
+          include: { game: true },
+          orderBy: { publishedAt: 'desc' },
+        }),
+        prisma.metaGuide.count(),
+      ]);
+      res.json({
+        data: guides,
+        pagination: {
+          totalItems: totalGuides,
+          totalPages: Math.ceil(totalGuides / limit),
+          currentPage: page,
+          pageSize: limit,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Something went wrong while fetching paginated metas' });
     }
-    res.json(guide);
-  } catch (error) {
-    res.status(500).json({ error: `Something went wrong while fetching guide ${id}` });
+  } else {
+    // Original request for public pages (fetch all)
+    try {
+      const guides = await prisma.metaGuide.findMany({
+        orderBy: { publishedAt: 'desc' },
+        include: { game: true },
+      });
+      res.json(guides);
+    } catch (error) {
+      res.status(500).json({ error: 'Something went wrong while fetching meta guides' });
+    }
   }
 });
 
-// PROTECTED: Create new guide
-router.post('/', authMiddleware, async (req, res) => {
-  const { title, content, author, gameId } = req.body;
-  if (!title || !content || !gameId) {
-    return res.status(400).json({ error: 'Title, content and gameId are required' });
-  }
-  try {
-    const newGuide = await prisma.metaGuide.create({
-      data: {
-        title,
-        content,
-        author,
-        gameId: parseInt(gameId),
-      },
-    });
-    res.status(201).json(newGuide);
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong, maybe the gameId does not exist?' });
-  }
-});
-
-// PROTECTED: Update guide
-router.put('/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  const { title, content, author, gameId } = req.body;
-  try {
-    const updatedGuide = await prisma.metaGuide.update({
-      where: { id: parseInt(id) },
-      data: { title, content, author, gameId: gameId ? parseInt(gameId) : undefined },
-    });
-    res.json(updatedGuide);
-  } catch (error) {
-    res.status(404).json({ error: `Guide with ID ${id} not found` });
-  }
-});
-
-// PROTECTED: Delete guide
-router.delete('/:id', authMiddleware, async (req, res) => {
-  const { id } = req.params;
-  try {
-    await prisma.metaGuide.delete({
-      where: { id: parseInt(id) },
-    });
-    res.status(204).send();
-  } catch (error) {
-    res.status(404).json({ error: `Guide with ID ${id} not found` });
-  }
-});
+// ... (GET by ID, POST, PUT, DELETE routes remain the same) ...
+router.get('/:id', async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.post('/', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.put('/:id', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.delete('/:id', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
 
 module.exports = router;

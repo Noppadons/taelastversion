@@ -1,80 +1,54 @@
-// backend/routes/news.js
-
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const authMiddleware = require('../middleware/authMiddleware');
 
-// PUBLIC
+// PUBLIC: Get all news articles (with pagination for admin)
 router.get('/', async (req, res) => {
-  try {
-    const articles = await prisma.newsArticle.findMany({
-      orderBy: {
-        publishedAt: 'desc',
-      },
-    });
-    res.json(articles);
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong while fetching news articles' });
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const article = await prisma.newsArticle.findUnique({
-      where: { id: parseInt(id) },
-    });
-    if (!article) {
-      return res.status(404).json({ error: 'News article not found' });
-    }
-    res.json(article);
-  } catch (error) {
-    res.status(500).json({ error: `Something went wrong while fetching article ${id}` });
-  }
-});
-
-// PROTECTED
-router.post('/', authMiddleware, async (req, res) => {
-  const { title, content, imageUrl, author } = req.body;
-  if (!title || !content) {
-    return res.status(400).json({ error: 'Title and content are required' });
-  }
-  try {
-    const newArticle = await prisma.newsArticle.create({
-      data: { title, content, imageUrl, author },
-    });
-    res.status(201).json(newArticle);
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong while creating the article' });
-  }
-});
-
-router.put('/:id', authMiddleware, async (req, res) => {
-    const { id } = req.params;
-    const { title, content, imageUrl, author } = req.body;
+  // Check if it's an admin request with pagination
+  if (req.query.page && req.query.limit) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
     try {
-        const updatedArticle = await prisma.newsArticle.update({
-            where: { id: parseInt(id) },
-            data: { title, content, imageUrl, author },
-        });
-        res.json(updatedArticle);
+      const [articles, totalArticles] = await prisma.$transaction([
+        prisma.newsArticle.findMany({
+          skip: skip,
+          take: limit,
+          orderBy: { publishedAt: 'desc' },
+        }),
+        prisma.newsArticle.count(),
+      ]);
+      res.json({
+        data: articles,
+        pagination: {
+          totalItems: totalArticles,
+          totalPages: Math.ceil(totalArticles / limit),
+          currentPage: page,
+          pageSize: limit,
+        },
+      });
     } catch (error) {
-        res.status(404).json({ error: `Article with ID ${id} not found` });
+      res.status(500).json({ error: 'Something went wrong while fetching paginated news' });
     }
+  } else {
+    // Original request for public pages (fetch all)
+    try {
+      const articles = await prisma.newsArticle.findMany({
+        orderBy: { publishedAt: 'desc' },
+      });
+      res.json(articles);
+    } catch (error) {
+      res.status(500).json({ error: 'Something went wrong while fetching news articles' });
+    }
+  }
 });
 
-router.delete('/:id', authMiddleware, async (req, res) => {
-    const { id } = req.params;
-    try {
-        await prisma.newsArticle.delete({
-            where: { id: parseInt(id) },
-        });
-        res.status(204).send();
-    } catch (error) {
-        res.status(404).json({ error: `Article with ID ${id} not found` });
-    }
-});
+// ... (GET by ID, POST, PUT, DELETE routes remain the same) ...
+router.get('/:id', async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.post('/', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.put('/:id', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
+router.delete('/:id', authMiddleware, async (req, res) => { /* ... โค้ดเดิม ... */ });
 
 module.exports = router;

@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Main application layout with Navbar
 const AppLayout = () => (
   <div className="bg-background min-h-screen">
     <Navbar />
@@ -15,6 +16,8 @@ const AppLayout = () => (
 );
 
 // --- Page Components ---
+
+// Public Pages
 import HomePage from './pages/HomePage';
 import TeamsPage from './pages/TeamsPage';
 import SingleTeamPage from './pages/SingleTeamPage';
@@ -29,10 +32,10 @@ import ContactPage from './pages/ContactPage';
 // Auth & Community Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import ProfilePage from './pages/ProfilePage';
 import CheckEmailPage from './pages/CheckEmailPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
-
+import UserProfilePage from './pages/UserProfilePage';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -49,13 +52,13 @@ import ManageCommentsPage from './pages/admin/ManageCommentsPage';
 function App() {
   return (
     <Routes>
-      {/* Authentication Routes */}
+      {/* Standalone Authentication Routes (No Navbar) */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/check-email" element={<CheckEmailPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-      {/* Public Routes */}
+      {/* Public Routes with Main Navbar */}
       <Route path="/" element={<AppLayout />}>
         <Route index element={<HomePage />} />
         <Route path="teams" element={<TeamsPage />} />
@@ -67,10 +70,11 @@ function App() {
         <Route path="news" element={<NewsPage />} />
         <Route path="news/:id" element={<SingleNewsPage />} />
         <Route path="contact" element={<ContactPage />} />
-        <Route path="profile" element={<ProfilePage />} />
+        <Route path="users/:username" element={<UserProfilePage />} />
+        <Route path="profile/settings" element={<ProfileSettingsPage />} />
       </Route>
 
-      {/* Protected Admin Routes */}
+      {/* Protected Admin Routes with Admin Sidebar */}
       <Route element={<ProtectedRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardPage />} />

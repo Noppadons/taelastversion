@@ -15,6 +15,7 @@ const commentRoutes = require('./routes/comments');
 const uploadRoutes = require('./routes/upload');
 const adminCommentRoutes = require('./routes/admin_comments');
 const profileRoutes = require('./routes/profile');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin/comments', adminCommentRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/users', userRoutes);
 
 // Route ทดสอบ
 app.get('/', (req, res) => {

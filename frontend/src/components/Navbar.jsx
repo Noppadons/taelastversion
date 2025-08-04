@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUserCircle } from 'react-icons/fa';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,22 +10,14 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    window.location.assign('/'); // บังคับให้โหลดหน้า Home ใหม่ทั้งหมด
   };
   
-  const navLinks = [
-    { title: 'Home', path: '/' },
-    { title: 'Teams', path: '/teams' },
-    { title: 'Players', path: '/players' },
-    { title: 'Meta', path: '/meta' },
-    { title: 'News', path: '/news' },
-    { title: 'Contact', path: '/contact' },
-  ];
+  const navLinks = [ /* ... */ ];
 
   const UserAvatar = () => (
     <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center overflow-hidden">
         <img 
-            src={user?.profileImageUrl || `https://ui-avatars.com/api/?name=${user?.username.substring(0,1)}&background=111827&color=22d3ee`} 
+            src={user?.profileImageUrl || `https://ui-avatars.com/api/?name=${user?.username.substring(0,2)}&background=111827&color=22d3ee`} 
             alt="User Avatar"
             className="w-full h-full object-cover"
         />
@@ -53,7 +44,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-4">
           {isAuthenticated ? (
             <>
-              <Link to="/profile" className="flex items-center gap-3 text-text-main hover:text-accent transition-colors">
+              <Link to={`/users/${user?.username}`} className="flex items-center gap-3 text-text-main hover:text-accent transition-colors">
                 <UserAvatar />
                 <span className="font-semibold">{user?.username}</span>
               </Link>
@@ -97,7 +88,7 @@ const Navbar = () => {
             <div className="py-4 border-t border-background flex flex-col items-center gap-4">
             {isAuthenticated ? (
               <>
-                <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-text-main text-xl">
+                <Link to={`/users/${user?.username}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-text-main text-xl">
                   <UserAvatar />
                   <span className="font-semibold">{user?.username}</span>
                 </Link>

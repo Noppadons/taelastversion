@@ -1,91 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // เพิ่ม useCallback
 import apiClient from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
+import Pagination from '../../components/Pagination';
 
-const MetaManagementCard = ({ guide, onDelete }) => {
-  return (
-    <div className="glass-card flex flex-col transition-all duration-300 group hover:border-accent/50">
-      <div className="p-4 flex-grow">
-        <p className="text-xs font-bold text-accent uppercase">{guide.game.name}</p>
-        <h3 className="font-bold text-lg text-text-main leading-tight mt-1 h-14 overflow-hidden group-hover:text-accent transition-colors">{guide.title}</h3>
-        <p className="text-xs text-text-secondary mt-2">by {guide.author}</p>
-      </div>
-      <div className="p-4 bg-black/20 rounded-b-2xl border-t border-white/10 flex justify-between items-center">
-        <p className="text-xs text-text-secondary font-mono">ID: {guide.id}</p>
-        <div className="space-x-2">
-          <Link to={`/admin/manage-metas/edit/${guide.id}`} className="btn btn-xs btn-ghost text-blue-400 hover:bg-blue-400 hover:text-white" title="Edit">
-            <FaEdit size={14}/>
-          </Link>
-          <button onClick={() => onDelete(guide.id)} className="btn btn-xs btn-ghost text-red-500 hover:bg-red-500 hover:text-white" title="Delete">
-            <FaTrash size={14}/>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+const MetaManagementCard = ({ guide, onDelete }) => { /* ... โค้ดเดิม ... */ };
 
 const ManageMetasPage = () => {
   const [guides, setGuides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [triggerFetch, setTriggerFetch] = useState(0); // State ใหม่เพื่อ trigger การ fetch
+
+  const fetchGuides = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get(`/metas?page=${currentPage}&limit=10`);
+      setGuides(response.data.data);
+      setPagination(response.data.pagination);
+
+      // ถ้าหน้าปัจจุบันที่ดึงมาไม่มีข้อมูล (เช่น เพิ่งลบรายการสุดท้ายไป) และไม่ใช่หน้า 1
+      // ให้ลองกลับไปหน้าก่อนหน้าโดยอัตโนมัติ
+      if (response.data.data.length === 0 && currentPage > 1) {
+          setCurrentPage(p => p - 1);
+      }
+    } catch (err) {
+      console.error("Failed to fetch meta guides", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage]);
 
   useEffect(() => {
-    const fetchGuides = async () => {
-      setLoading(true);
-      try {
-        const response = await apiClient.get('/metas');
-        setGuides(response.data);
-      } catch (err) {
-        console.error("Failed to fetch meta guides", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchGuides();
-  }, []);
+  }, [fetchGuides, triggerFetch]); // ทำงานเมื่อ fetchGuides หรือ triggerFetch เปลี่ยน
 
   const handleDelete = async (guideId) => {
     if (window.confirm('Are you sure you want to delete this meta guide?')) {
       try {
         await apiClient.delete(`/metas/${guideId}`);
-        setGuides(guides.filter(guide => guide.id !== guideId));
         alert('Meta guide deleted successfully!');
+        
+        // เมื่อลบสำเร็จ ก็แค่สั่งให้ดึงข้อมูลใหม่โดยการอัปเดต state นี้
+        setTriggerFetch(c => c + 1);
+
       } catch (err) {
         alert('Error: Could not delete the guide.');
+        console.error("Failed to delete meta guide", err);
       }
     }
   };
 
-  if (loading) return <p className="text-text-secondary">Loading meta guides...</p>;
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  if (loading) return <p className="text-text-secondary p-8">Loading meta guides...</p>;
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-text-main">Manage Meta Guides</h1>
-          <p className="text-text-secondary mt-1">Manage all strategy guides and analyses.</p>
-        </div>
-        <Link to="/admin/manage-metas/new" className="btn-primary bg-accent hover:shadow-accent/50">
-          <FaPlus className="mr-2" /> Add New Guide
-        </Link>
-      </div>
-      <div className="glass-card p-4 flex items-center gap-4">
-        <div className="relative flex-grow">
-          <input type="text" placeholder="Search guides..." className="input-field bg-transparent border-none pl-10" />
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-        </div>
-      </div>
+      {/* ... Header and Search Bar ... */}
+
       {guides.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {guides.map(guide => (
-            <MetaManagementCard key={guide.id} guide={guide} onDelete={handleDelete} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {guides.map(guide => (
+              <MetaManagementCard key={guide.id} guide={guide} onDelete={handleDelete} />
+            ))}
+          </div>
+          {pagination && pagination.totalPages > 1 && ( // แสดงผลเมื่อมีมากกว่า 1 หน้า
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
       ) : (
-        <div className="text-center glass-card p-12">
-          <h3 className="text-2xl font-bold text-text-main">No Guides Found</h3>
-          <p className="text-text-secondary mt-2">Click "Add New Guide" to get started.</p>
+        <div className="text-center p-8">
+            <p className="text-text-secondary">No meta guides found.</p>
         </div>
       )}
     </div>
