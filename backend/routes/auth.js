@@ -7,6 +7,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { sendVerificationEmail } = require('../utils/email');
 
+// --- User Registration ---
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -24,6 +25,7 @@ router.post('/register', async (req, res) => {
         
         const hashedPassword = await bcrypt.hash(password, 10);
         const verificationToken = crypto.randomBytes(32).toString('hex');
+
         const user = await prisma.user.create({
             data: { username, email, password: hashedPassword, verificationToken },
         });
@@ -31,10 +33,12 @@ router.post('/register', async (req, res) => {
         await sendVerificationEmail(user.email, verificationToken);
         res.status(201).json({ message: 'Registration successful. Please check your email to verify your account.' });
     } catch (error) {
+        console.error("Registration Error:", error);
         res.status(500).json({ error: 'An error occurred during registration.' });
     }
 });
 
+// --- Email Verification ---
 router.get('/verify', async (req, res) => {
     const { token } = req.query;
     if (!token) {
@@ -43,7 +47,7 @@ router.get('/verify', async (req, res) => {
     try {
         const user = await prisma.user.findUnique({ where: { verificationToken: String(token) } });
         if (!user) {
-            return res.status(400).send('Invalid or expired verification token.');
+            return res.status(400).send('<h1>Verification Failed</h1><p>This link is invalid or has expired. Please try registering again.</p>');
         }
         await prisma.user.update({
             where: { id: user.id },
@@ -51,25 +55,30 @@ router.get('/verify', async (req, res) => {
         });
         res.send('<h1>Email verified successfully!</h1><p>You can now close this tab and log in.</p>');
     } catch (error) {
+        console.error("Verification Error:", error);
         res.status(500).send('An error occurred during email verification.');
     }
 });
 
+// --- User Login ---
 router.post('/login', async (req, res) => {
   const { identifier, password } = req.body;
+  if (!identifier || !password) {
+      return res.status(400).json({ error: 'Identifier and password are required.' });
+  }
   try {
     const user = await prisma.user.findFirst({
         where: { OR: [ { email: identifier }, { username: identifier } ] }
     });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
     if (!user.isVerified) {
         return res.status(403).json({ error: 'Please verify your email address before logging in.' });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
     const token = jwt.sign(
       { userId: user.id, username: user.username, role: user.role },
@@ -78,7 +87,8 @@ router.post('/login', async (req, res) => {
     );
     res.json({ token, role: user.role, username: user.username, profileImageUrl: user.profileImageUrl });
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred during login' });
+    console.error("Login Error:", error);
+    res.status(500).json({ error: 'An error occurred during login.' });
   }
 });
 

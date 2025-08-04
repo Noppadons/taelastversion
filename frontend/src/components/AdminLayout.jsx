@@ -8,6 +8,7 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     logout();
+    window.location.assign('/'); // บังคับให้โหลดหน้า Home ใหม่ทั้งหมด
   };
 
   const menuItems = [

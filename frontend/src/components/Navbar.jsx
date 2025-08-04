@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom'; // <-- เพิ่ม useNavigate
+import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FaUserCircle } from 'react-icons/fa';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const navigate = useNavigate(); // <-- เรียกใช้ useNavigate
 
   const handleLogout = () => {
     logout();
-    navigate('/'); // <-- สั่งให้กลับไปที่หน้า Home
+    window.location.assign('/'); // บังคับให้โหลดหน้า Home ใหม่ทั้งหมด
   };
   
   const navLinks = [

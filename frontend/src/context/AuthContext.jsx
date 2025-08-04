@@ -1,4 +1,3 @@
-// frontend/src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import apiClient from '../api/axios';
 
@@ -36,7 +35,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
   
-  // ฟังก์ชันใหม่สำหรับอัปเดตข้อมูล user ใน context
   const updateUserProfile = (newProfileData) => {
     setUser(prevUser => {
         const updatedUser = { ...prevUser, ...newProfileData };
@@ -50,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     logout,
-    updateUserProfile, // <-- ส่งฟังก์ชันใหม่
+    updateUserProfile,
     isAuthenticated: !!token,
   };
 

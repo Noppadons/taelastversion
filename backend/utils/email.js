@@ -10,24 +10,22 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendVerificationEmail = async (to, token) => {
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    // ใช้ FRONTEND_URL ถ้าอยู่บน Production, ถ้าไม่ ให้ใช้ localhost
+    const baseUrl = process.env.FRONTEND_URL || 'https://tae-esport.onrender.com';
+    const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
+
     const mailOptions = {
         from: `"TAE-ESPORT" <${process.env.EMAIL_USER}>`,
         to: to,
         subject: 'Verify Your Email Address for TAE-ESPORT',
-        html: `
-            <h2>Welcome to TAE-ESPORT!</h2>
-            <p>Thank you for registering. Please click the link below to verify your email address:</p>
-            <a href="${verificationUrl}" style="background-color: #22d3ee; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verify Email</a>
-            <p>If you did not register for this account, you can ignore this email.</p>
-        `,
+        html: `<p>Please click the link below to verify your email address:</p><a href="${verificationUrl}">Verify Email</a>`,
     };
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log('Verification email sent to:', to);
     } catch (error) {
         console.error('Error sending verification email:', error);
+        throw new Error('Could not send verification email.');
     }
 };
 
