@@ -15,6 +15,8 @@ model User {
   email           String    @unique
   password        String
   profileImageUrl String?
+  bio             String?   // <-- เพิ่มบรรทัดนี้
+  socialLinks     Json?     // <-- เพิ่มบรรทัดนี้
   role            Role      @default(USER)
   isVerified      Boolean   @default(false)
   verificationToken String?   @unique
